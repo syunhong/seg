@@ -1,0 +1,19 @@
+Package: seg
+Version: 0.5-1
+Date: 2014-5-28
+Title: A set of tools for measuring spatial segregation
+Authors@R: c(person("Seong-Yun", "Hong", role = c("aut", "cre"), email
+        = "hong.seongyun@gmail.com"), person("David", "O'Sullivan",
+        role = "ctb"))
+Maintainer: Seong-Yun Hong <hong.seongyun@gmail.com>
+Depends: R (>= 3.0.0), methods, stats, sp
+Imports: splancs
+Suggests: spdep, spgrass6, rgdal
+Description: A package that provides functions for measuring spatial 
+        segregation. The methods implemented in this package include 
+        White's P index (1983), Morrill's D(adj) (1991), Wong's D(w)
+        and D(s) (1993), and Reardon and O'Sullivan's set of spatial 
+        segregation measures (2004).
+License: GPL (>= 3)
+URL: https://sites.google.com/site/hongseongyun/seg
+        
