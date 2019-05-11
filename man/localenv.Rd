@@ -6,7 +6,7 @@
 \code{localenv} calculates the local population composition at each data point from a matrix of coordinates, or an object of class \code{Spatial} or \code{ppp}.
 }
 \usage{
-localenv(x, data, power = 2, useExp = TRUE, maxdist, sprel, 
+localenv(x, data, power = 2, useExp = TRUE, scale = FALSE, maxdist, sprel, 
          tol = .Machine$double.eps)
 }
 \arguments{
@@ -14,6 +14,7 @@ localenv(x, data, power = 2, useExp = TRUE, maxdist, sprel,
   \item{data}{an object of class \code{matrix}, or one that can be coerced to that class. The number of rows in \sQuote{data} should equal the number of points in \sQuote{x}, and the number of columns should be greater than one (at least two population groups are required). This can be missing if \sQuote{x} has a data frame attached to it.}
   \item{power}{a numeric value that determines the change rate of a distance weight function. If zero, all data points have the same weight regardless of the distance. Typically 1-5.}
   \item{useExp}{logical. If FALSE, use a simple inverse distance function instead of a negative exponential function. See \sQuote{Details}.}
+  \item{scale}{logical. If TRUE, the distances between points in \sQuote{x} are scaled so the weights are not affected by the measurement unit. The default is FALSE for consistency with the previous version.}
   \item{maxdist}{an optional numeric value specifying a search radius for the construction of each local environment. Must be a positive value, or zero.}
   \item{sprel}{an optional object of class \code{dist} or \code{nb}. See \sQuote{Details}.}
   \item{tol}{a small, positive non-zero value. If \sQuote{useExp} is FALSE, this value will be added to the denominator to avoid the divide-by-zero error.}

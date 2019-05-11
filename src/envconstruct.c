@@ -6,14 +6,15 @@
    envconstruct()
 
    Start    : 19 April 2011
-   End      : 
+   Updated  : 23 September 2018
    R objects: xval, yval, data, as.integer(dim), power, as.integer(useExp), 
-              threshold, error
+              as.integer(scale), threshold, error
 ----------------------------------------------------------------------------- */
-SEXP envconstruct(SEXP x, SEXP y, SEXP v, SEXP dim, SEXP p, SEXP useExp, 
-                  SEXP d, SEXP e)
+SEXP envconstruct(SEXP x, SEXP y, SEXP v, SEXP dim, SEXP p, SEXP useExp,
+                  SEXP scale, SEXP d, SEXP e)
 {
-  int i, j, k, nrow, ncol = INTEGER(dim)[0], expF = INTEGER(useExp)[0];
+  int i, j, k, nrow, ncol = INTEGER(dim)[0], expF = INTEGER(useExp)[0],
+      scaled = INTEGER(scale)[0];
   double *xP, *yP, *vP, *envP, weight, weightSum, dx, dy, dxy, 
          dist = REAL(d)[0], power = REAL(p)[0], error = REAL(e)[0];
   SEXP env;
@@ -49,10 +50,23 @@ SEXP envconstruct(SEXP x, SEXP y, SEXP v, SEXP dim, SEXP p, SEXP useExp,
         dxy = sqrt(dx*dx + dy*dy);
       }
       
-      if (expF == 0) // Inverse distance weight
-        weight = 1/pow(dxy + error, power);
-      else           // Inverse distance weight using an exponential function
-        weight = exp(dxy * power * -1);     
+      if (scaled == 0) {
+        if (expF == 0) // Inverse distance weight
+          weight = 1/pow(dxy + error, power);
+        else           // Inverse distance weight using an exponential function
+          weight = exp(dxy * power * -1);            
+      } 
+      
+      else {
+        /* ---------------------------------------------------------------------
+         Code contribution from Benjamin Jarvis, 2 August 2018
+         --------------------------------------------------------------------- */         
+         if (expF == 0)  // normal-like biweight kernel
+           weight = pow(1 - pow(dxy/dist, power), power);
+         else           // scaled and normalized exponential decay
+           weight = (exp(dxy/dist * power * -1) - 
+             exp(power * -1))/(1 - exp(power * -1));
+      }
 
       // Get weighted total
       for (k = 0; k < ncol; k++) {

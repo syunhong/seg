@@ -4,9 +4,12 @@
 #include <Rinternals.h>
 
 /* -----------------------------------------------------------------------------
-   spseg()
+   spsegIDX()
 
-   Last updated: Thu 28 Apr 2011 22:21:50 NZST 
+   Last updated: 
+   Updated: Thu 28 Apr 2011 22:21:50 NZST
+            Mon 24 Sept 2018 20:36 
+            // Filename changed from spseg() to spsegIDX()
 
    R objects   : Rx, Ry, Rm, Ridx   
      'Rx'   - a numeric vector containing the population of each group at each
@@ -16,7 +19,7 @@
      'Rm'   - an integer indicating the number of population groups.
      'Ridx' - a numeric vector indicating indices to calculate.
 ----------------------------------------------------------------------------- */
-SEXP spseg(SEXP Rx, SEXP Ry, SEXP Rm, SEXP Ridx)
+SEXP spsegIDX(SEXP Rx, SEXP Ry, SEXP Rm, SEXP Ridx)
 {
   int i, j, k, size = length(Rx), nrow, ncol = INTEGER(Rm)[0], *idx, INDEX;
   double *x, *y, *resultsP, *xRowSum, *yRowSum, *xColSum, *yColSum, 

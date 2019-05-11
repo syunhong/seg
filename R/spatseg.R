@@ -47,7 +47,7 @@ spatseg <- function(env, method = "all", useC = TRUE, negative.rm = FALSE,
     m <- ncol(dd)
     method <- c("exposure" %in% method, "information" %in% method,
                 "diversity" %in% method, "dissimilarity" %in% method)
-    tmp <- .Call("spseg", as.vector(dd), as.vector(ee), 
+    tmp <- .Call("spsegIDX", as.vector(dd), as.vector(ee), 
                           as.integer(m), as.integer(method))
     results <- list(); n <- m^2
     if (!is.na(tmp[1])) {

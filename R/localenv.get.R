@@ -3,7 +3,7 @@
 #
 # Author: Seong-Yun Hong <hong.seongyun@gmail.com>
 # ------------------------------------------------------------------------------
-localenv.get <- function(sprel, data, power, useExp, maxdist, tol) {
+localenv.get <- function(sprel, data, power, useExp, scale, maxdist, tol) {
   
   grps <- colnames(data); rows <- rownames(data)
   
@@ -36,7 +36,7 @@ localenv.get <- function(sprel, data, power, useExp, maxdist, tol) {
     xval <- sprel[,1]; yval <- sprel[,2]
     dim <- ncol(data); data <- as.vector(data)
     env <- .Call("envconstruct", xval, yval, data, as.integer(dim), power, 
-                 as.integer(useExp), maxdist, tol)
+                 as.integer(useExp), as.integer(scale), maxdist, tol)
     # --------------------------------------------------------------------------
     # R version 'envconstruct()'
     # --------------------------------------------------------------------------

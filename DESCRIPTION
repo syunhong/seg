@@ -1,19 +1,23 @@
 Package: seg
-Version: 0.5-1
-Date: 2014-5-28
-Title: A set of tools for measuring spatial segregation
-Authors@R: c(person("Seong-Yun", "Hong", role = c("aut", "cre"), email
-        = "hong.seongyun@gmail.com"), person("David", "O'Sullivan",
-        role = "ctb"))
-Maintainer: Seong-Yun Hong <hong.seongyun@gmail.com>
-Depends: R (>= 3.0.0), methods, stats, sp
+Version: 0.5-6
+Date: 2019-05-10
+Title: Measuring Spatial Segregation
+Author: Seong-Yun Hong <syhong@khu.ac.kr> and 
+  David O'Sullivan <david.osullivan@vuw.ac.nz>, with code contributions by 
+  Benjamin Jarvis and Changlock Choi
+Maintainer: Seong-Yun Hong <syhong@khu.ac.kr>
+Depends: R (>= 3.4.0), methods, stats, sp
 Imports: splancs
 Suggests: spdep, spgrass6, rgdal
-Description: A package that provides functions for measuring spatial 
-        segregation. The methods implemented in this package include 
-        White's P index (1983), Morrill's D(adj) (1991), Wong's D(w)
-        and D(s) (1993), and Reardon and O'Sullivan's set of spatial 
-        segregation measures (2004).
+Description: Measuring spatial segregation. The methods implemented in this 
+        package include White's P index (1983) <doi:10.1086/227768>, 
+        Morrill's D(adj) (1991), Wong's D(w) and D(s) (1993) 
+        <doi:10.1080/00420989320080551>, and Reardon and O'Sullivan's set of 
+        spatial segregation measures (2004) 
+        <doi:10.1111/j.0081-1750.2004.00150.x>.
 License: GPL (>= 3)
-URL: https://sites.google.com/site/hongseongyun/seg
-        
+URL: http://gbdl.khu.ac.kr/seg.html
+NeedsCompilation: yes
+Packaged: 2019-05-10 07:20:11 UTC; Seong-Yun
+Repository: CRAN
+Date/Publication: 2019-05-11 07:00:03 UTC

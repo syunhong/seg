@@ -40,19 +40,19 @@
 
 .use.spdep <- function(x, data, p2n.args, n2m.args, verbose) {
   speffect <- NA
-  if (require(spdep, quietly = TRUE)) {
+  if (requireNamespace("spdep", quietly = TRUE)) {
     if (verbose) {
       message("library 'spdep' appears to be available")
       message("attempting to calculate Morrill's D(adj)")
     }
-
+    
     if (missing(p2n.args)) {
       p2n.args <- list(pl = x)
     } else {
       if (is.null(p2n.args$pl))
         p2n.args$pl <- x
     }
-    grd.nb <- do.call("poly2nb", p2n.args)
+    grd.nb <- do.call("spdep::poly2nb", p2n.args)
     
     if (missing(n2m.args)) {
       n2m.args <- list(neighbours = grd.nb)
@@ -62,20 +62,23 @@
       if (is.null(n2m.args$style))
         n2m.args$style <- "B"
     }
-    grd.nb <- do.call("nb2mat", n2m.args)
+    grd.nb <- do.call("spdep::nb2mat", n2m.args)
     grd.nb <- grd.nb / sum(grd.nb)
     speffect <- .d.adjust(data, grd.nb)
-  } else if (verbose) {
+  } 
+  
+  else if (verbose) {
     message("failed to load 'spdep'")
   }
+  
   speffect
 }
 
 .use.spgrass6 <- function(x, data, wVECT.args, v2n.args, verbose) {
   speffect <- rep(NA, 2)
-  if (require(spgrass6, quietly = TRUE) & 
-        require(rgdal, quietly = TRUE) & 
-        require(spdep, quietly = TRUE)) {
+  if (requireNamespace("spgrass6", quietly = TRUE) & 
+      requireNamespace("rgdal", quietly = TRUE) & 
+      requireNamespace("spdep", quietly = TRUE)) {
     if (verbose) {
       message("library 'spgrass6' and 'rgdal' appear to be available")
       message("attempting to calculate Wong's D(w) and D(s)")
@@ -92,7 +95,7 @@
       if (is.null(wVECT.args$vname))
         wVECT.args$vname <- "tmp"
     }
-    do.call("writeVECT6", wVECT.args)
+    do.call(spgrass6::writeVECT6, wVECT.args)
     
     if (missing(v2n.args)) {
       v2n.args <- list(vname = wVECT.args$vname)
@@ -100,8 +103,8 @@
       if (is.null(v2n.args$vname))
       v2n.args$vname <- wVECT.args$vname
     }
-    sl <- do.call("vect2neigh", v2n.args)
-    sl.mat <- listw2mat(sn2listw(sl))
+    sl <- do.call(spgrass6::vect2neigh, v2n.args)
+    sl.mat <- spdep::listw2mat(spdep::sn2listw(sl))
     sl.mat <- sl.mat / sum(sl.mat)  
     speffect[1] <- .d.adjust(data, sl.mat)
     
