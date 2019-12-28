@@ -19,13 +19,13 @@ chksegdata <- function(x, data) {
   if (inherits(x, "Spatial")) {   
     message(fn, ": 'x' is an object of class \"Spatial\"")
     coords <- try(coordinates(x), silent = TRUE)
-    if (class(coords) == "try-error")
+    if (inherits(coords, "try-error"))
       stop("failed to extract coordinates from 'x'", call. = FALSE)
     message(fn, ": ", nrow(coords), " coordinates extracted from 'x'")
     
     if (missing(data)) {
       data <- try(as.matrix(x@data), silent = TRUE) 
-      if (class(data) == "try-error")
+      if (inherits(data, "try-error"))
         stop("'data' is missing, with no default", call. = FALSE)
       message(fn, ": 'data' is missing, use the one attached to 'x'")
     } else {

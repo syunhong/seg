@@ -1,6 +1,6 @@
 Package: seg
-Version: 0.5-6
-Date: 2019-05-10
+Version: 0.5-7
+Date: 2019-12-18
 Title: Measuring Spatial Segregation
 Author: Seong-Yun Hong <syhong@khu.ac.kr> and 
   David O'Sullivan <david.osullivan@vuw.ac.nz>, with code contributions by 
@@ -16,8 +16,8 @@ Description: Measuring spatial segregation. The methods implemented in this
         spatial segregation measures (2004) 
         <doi:10.1111/j.0081-1750.2004.00150.x>.
 License: GPL (>= 3)
-URL: http://gbdl.khu.ac.kr/seg.html
+URL: https://github.com/syunhong/seg
 NeedsCompilation: yes
-Packaged: 2019-05-10 07:20:11 UTC; Seong-Yun
+Packaged: 2019-12-18 05:31:01 UTC; Seong-Yun
 Repository: CRAN
-Date/Publication: 2019-05-11 07:00:03 UTC
+Date/Publication: 2019-12-18 15:20:02 UTC

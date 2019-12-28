@@ -7,14 +7,14 @@ localenv.get <- function(sprel, data, power, useExp, scale, maxdist, tol) {
   
   grps <- colnames(data); rows <- rownames(data)
   
-  if (class(sprel) == "nb") {
+  if (inherits(sprel, "nb")) {
     xmat <- spdep::nb2mat(sprel, style = "W") # needs the package 'spdep'
     if (nrow(xmat) != nrow(data)) 
       stop("'data' must have the same number of rows as 'sprel'", call. = FALSE)
     env <- xmat %*% data
   }
   
-  else if (class(sprel) == "dist") {
+  else if (inherits(sprel, "dist")) {
     sprel <- as.matrix(sprel)
     if (nrow(sprel) != nrow(data)) 
       stop("'data' must have the same number of rows as 'sprel'", call. = FALSE)

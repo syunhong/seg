@@ -34,7 +34,7 @@ localenv <- function(x, data, power = 2, useExp = TRUE, scale = FALSE,
   
   if (missing(sprel)) 
     sprel <- coords
-  else if (class(sprel) != "nb" && class(sprel) != "dist")
+  else if (!inherits(sprel, "nb") && !inherits(sprel, "dist"))
     stop("invalid object 'sprel'", call. = FALSE)
 
   env <- localenv.get(sprel, data, power, useExp, scale, maxdist, tol)
