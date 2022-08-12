@@ -42,15 +42,10 @@ for (i in 1:8) {
 1. Numbered
 2. List
 
-        | Package seg |        |      |      |   |        |   |        |      |
-Pattern | D           | D(adj) | D(w) | D(s) | D | D(adj) | D | D(adj) | D(w) | D(s)
+|         | Package seg |        |      |      |   |        |   |        |      |       |
+|---------|-------------|--------|------|------|---|--------|---|--------|------|-------|
+| Pattern | D           | D(adj) | D(w) | D(s) | D | D(adj) | D | D(adj) | D(w) | D(s)  |
 
-
-
-| Pattern | `seg` D       | `seg` D(adj)  | D(w)          | D(s)          | Content Cell  | Content Cell  | 
-| | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
-| | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
 
 **Bold** and _Italic_ and `Code` text
 
