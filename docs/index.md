@@ -42,7 +42,7 @@ for (i in 1:8) {
 1. Numbered
 2. List
 
-| D             | D(adj)        | D(w)          | D(s)          | Content Cell  | Content Cell  | 
+| D                            || D(w)          | D(s)          | Content Cell  | Content Cell  | 
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
