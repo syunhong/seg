@@ -6,15 +6,8 @@ output:
     toc_depth: 2
     toc_float: true
 ---
-<<<<<<< HEAD
-<style type="text/css">
-  body{
-  font-family: Helvetica;
-}
-</style>
 
 *Note: This page is a copy of a [Google Sites page](https://sites.google.com/site/hongseongyun/seg) that was last updated on 6 November 2014. The instructions below apply only to versions prior to 0.6.0.*
-
 
 # Introduction
 
@@ -194,20 +187,4 @@ dissim(x = grd.sp, data = segdata[,1:2], adjust = TRUE, p2n.args = list(queen = 
 
 The table below compares the segregation values in the original article to the ones from the function dissim().
 
-| Pattern    | D          | D(adj)     | D(w)       | D(s)       | D[^1]      | D(adj)[^1] | D[^2]      | D(adj)[^2] | D(w)[^2]   | D(s)[^2]   |
-|------------|------------|------------|------------|------------|------------|------------|------------|------------|------------|------------|
-| ![Image](img/pattern_1.png) | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-| ![Image](img/pattern_2.png) | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-
-
-[^1]: Morrill
-[^2]: D
+The table below compares the segregation values in the original article to the ones from the function dissim().
