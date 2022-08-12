@@ -1,12 +1,27 @@
-# R package 'seg'
+---
+title: "R package `seg`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+*Note: This page is a copy of a [Google Sites page](https://sites.google.com/site/hongseongyun/seg) that was last updated on 6 November 2014. The instructions below apply only to versions prior to 0.6.0.*
+
+
+# Introduction
 
 The `seg` package is a collection of segregation measures developed in the geographical and sociological literature. Implemented measures range from simple, traditional methods like the index of dissimilarity (1955) to more sophisticated, spatial approaches such as Reardon and O'Sullivan's spatial segregation measures (2004). 
 
-If you think I have missed any important methods in the field, or if you have any suggestions or new ideas to make existing features better, please do not hesitate to email me at hong.seongyun [at] gmail.com. Reported bugs will be fixed as soon as possible. All other suggestions will be considered when preparing for the next update. Please note however that I work on this package mainly in my spare time, so updates may not be as frequent as I would like. My aim is to have at least two updates every year (one in May and the other in November).
+If you think I have missed any important methods in the field, or if you have any suggestions or new ideas to make existing features better, please do not hesitate to email me at hong.seongyun [at] gmail.com.
 
-This page demonstrates the use of dissim(), isp() and spseg() for computing Duncan & Duncan's D, Morrill's D(adj), Wong's D(w) and D(s), White's SP, and Reardon and O'Sullivan's spatial segregation measures. The latest version of seg is available to download from CRAN: http://cran.r-project.org/web/packages/seg/
+Reported bugs will be fixed as soon as possible. All other suggestions will be considered when preparing for the next update. Please note however that I work on this package mainly in my spare time, so updates may not be as frequent as I would like. My aim is to have at least two updates every year (one in May and the other in November).
 
-## Hypothetical patterns of segregation
+This page demonstrates the use of `dissim()`, `isp()` and `spseg()` for computing Duncan & Duncan's D, Morrill's D(adj), Wong's D(w) and D(s), White's SP, and Reardon and O'Sullivan's spatial segregation measures. The latest version of seg is available to download from CRAN: http://cran.r-project.org/web/packages/seg/
+
+
+# Hypothetical patterns of segregation
 
 The seg package contains a sample data set of eight different distributions of the population for testing purpose. The data set itself is a simple data frame but it can be displayed on a 10-by-10 grid to reproduce the hypothetical segregation patterns used by Morrill (1991) and Wong (1993).
 
@@ -34,11 +49,11 @@ for (i in 1:8) {
 }
 ```
 
-## Index of dissimilarity, D, and its spatial counterparts
+# Index of dissimilarity, D, and its spatial counterparts
 
 The index of dissimilarity, D, and its spatial counterparts, D(adj), D(w), and D(s) can be calculated in two ways. One is by using the function seg(), and the other is by using the function dissim(). For D, which is insensitive to the spatial arrangements of spatial units (e.g., census tracts), there are practically no differences between these two functions. Both functions require a data frame with two columns, each of which represents a population group, as an input.
 
-```
+```r
 seg(data = segdata[,1:2])
 # [1] 1
 dissim(data = segdata[,1:2])
@@ -60,7 +75,7 @@ dissim(data = segdata[,1:2])
 
 The difference arises when we need to calculate its spatial associates proposed by Morrill (1991) and Wong (1993). For example, if you want to adjust D as suggested by Morrill (1991), you should first construct a rook-based, binary contiguity matrix for the study region (where 1 indicates "connected" and 0 "not connected) and standardise it by the total number of neighbours. The function seg() asks you to do this. In R, you can use poly2nb() and nb2mat() in package spdep to create such matrices.
 
-```
+```r
 library(spdep)
 
 # Create a rook-based (queen = FALSE), binary (style = "B") contiguity matrix
@@ -107,7 +122,7 @@ In R, this is do-able but is not an easy task. See https://stat.ethz.ch/pipermai
 3. Divide the values in the matrix by the total shared boundary length
 4. Use the standardised matrix as 'nb'
 
-```
+```r
 library(spgrass6); library(rgdal)
 
 # Run GRASS in the current R session. Change the path (in red) to where you
@@ -133,7 +148,7 @@ seg(segdata[,1:2], nb = sl.mat)
 
 D(s) uses the perimeter/area ratio of the units for the adjustment. The areas of the units are already stored in your SpatialPolygons object. The perimeters can be obtained using vect2neigh(). Note that the boundary of the study region is not counted towards the calculation of the perimeters. See p. 566 in Wong (1993) for an explanation.
 
-```
+```r
 A <- unlist(lapply(slot(grd.sp, "polygons"), function(z) slot(z, "area")))
 P <- attr(sl, "total") - attr(sl, "external")
 PAR <- P/A
@@ -150,7 +165,7 @@ seg(segdata[,1:2], nb = sl.mat * PAR.mat)
 
 As mentioned above, the function dissim() is a wrapper function that calls seg() with the extra code above, so the adjustment is made automatically. All you have to do is to make sure that you have the necessary libraries installed.
 
-```
+```r
 library(spgrass6); library(rgdal)
 initGRASS("C:/Program Files (x86)/GRASS 6.4.1", home = tempdir())
 
@@ -175,8 +190,8 @@ The table below compares the segregation values in the original article to the o
 
 | Pattern    | D          | D(adj)     | D(w)       | D(s)       | D[^1]      | D(adj)[^1] | D[^2]      | D(adj)[^2] | D(w)[^2]   | D(s)[^2]   |
 |------------|------------|------------|------------|------------|------------|------------|------------|------------|------------|------------|
-| ![Image](https://sites.google.com/site/hongseongyun/_/rsrc/1377670736667/seg/pattern_1.png) | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
+| ![Image](img/pattern_1.png) | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
+| ![Image](img/pattern_2.png) | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
@@ -187,24 +202,8 @@ The table below compares the segregation values in the original article to the o
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 
-
-![Image](src)
 
 [^1]: Morrill
-
 [^2]: D
 
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and 
-```
-
 For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
-
-# Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/syunhong/seg/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-# Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
