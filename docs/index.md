@@ -42,6 +42,11 @@ for (i in 1:8) {
 1. Numbered
 2. List
 
+| Package 'seg'                 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
+| Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
+
 **Bold** and _Italic_ and `Code` text
 
 [Link](url) and ![Image](src)
