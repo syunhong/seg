@@ -42,10 +42,14 @@ for (i in 1:8) {
 1. Numbered
 2. List
 
-|         | `seg` | `seg`  | `seg`| `seg`| Morrill | Morrill  | Wong  | Wong       | Wong     | Wong      |
-|---------|-------|--------|------|------|---|--------|---|--------|------|-------|
-| Pattern | D     | D(adj) | D(w) | D(s) | D | D(adj) | D | D(adj) | D(w) | D(s)  |
 
+| Pattern | D     | D(adj) | D(w) | D(s) | D[^1] | D(adj)[^1] | D[^2] | D(adj)[^2] | D(w)[^2] | D(s)[^2]  |
+|---------|-------|--------|------|------|---|--------|---|--------|------|-------|
+
+
+[^1]: Morrill
+
+[^2]: D
 
 **Bold** and _Italic_ and `Code` text
 
