@@ -6,6 +6,7 @@ output:
     toc_depth: 2
     toc_float: true
 ---
+<<<<<<< HEAD
 <style type="text/css">
   body{
   font-family: Helvetica;
