@@ -42,22 +42,12 @@ for (i in 1:8) {
 1. Numbered
 2. List
 
-| D                            || D(w)          | D(s)          | Content Cell  | Content Cell  | 
+| `seg` D       | `seg` D(adj)  | D(w)          | D(s)          | Content Cell  | Content Cell  | 
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
 
 **Bold** and _Italic_ and `Code` text
-
-|             |          Grouping           ||
-First Header  | Second Header | Third Header |
- ------------ | :-----------: | -----------: |
-Content       |          *Long Cell*        ||
-Content       |   **Cell**    |         Cell |
-
-New section   |     More      |         Data |
-And more      | With an escaped '\|'         ||  
-[Prototype table]
 
 [Link](url) and ![Image](src)
 ```
