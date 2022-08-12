@@ -49,6 +49,16 @@ for (i in 1:8) {
 
 **Bold** and _Italic_ and `Code` text
 
+|             |          Grouping           ||
+First Header  | Second Header | Third Header |
+ ------------ | :-----------: | -----------: |
+Content       |          *Long Cell*        ||
+Content       |   **Cell**    |         Cell |
+
+New section   |     More      |         Data |
+And more      | With an escaped '\|'         ||  
+[Prototype table]
+
 [Link](url) and ![Image](src)
 ```
 
