@@ -42,7 +42,7 @@ for (i in 1:8) {
 1. Numbered
 2. List
 
-| Package 'seg'                 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
+| Package 'seg' |    f          | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
