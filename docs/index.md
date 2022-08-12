@@ -10,7 +10,7 @@ This page demonstrates the use of dissim(), isp() and spseg() for computing Dunc
 
 The seg package contains a sample data set of eight different distributions of the population for testing purpose. The data set itself is a simple data frame but it can be displayed on a 10-by-10 grid to reproduce the hypothetical segregation patterns used by Morrill (1991) and Wong (1993).
 
-```
+```r
 library(seg)
 # Load the sample data set into the current workspace
 data(segdata)
@@ -42,7 +42,7 @@ for (i in 1:8) {
 1. Numbered
 2. List
 
-| Package 'seg' |    f          | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
+| D             | D(adj)        | D(w)          | D(s)          | Content Cell  | Content Cell  | 
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
 | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | Content Cell  | 
