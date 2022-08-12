@@ -42,9 +42,9 @@ for (i in 1:8) {
 1. Numbered
 2. List
 
-|         | Package seg |        |      |      |   |        |   |        |      |       |
-|---------|-------------|--------|------|------|---|--------|---|--------|------|-------|
-| Pattern | D           | D(adj) | D(w) | D(s) | D | D(adj) | D | D(adj) | D(w) | D(s)  |
+|         | `seg` | `seg`  | `seg`| `seg`| Morrill | Morrill  | Wong  | Wong       | Wong     | Wong      |
+|---------|-------|--------|------|------|---|--------|---|--------|------|-------|
+| Pattern | D     | D(adj) | D(w) | D(s) | D | D(adj) | D | D(adj) | D(w) | D(s)  |
 
 
 **Bold** and _Italic_ and `Code` text
