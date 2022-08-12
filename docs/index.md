@@ -175,7 +175,8 @@ The table below compares the segregation values in the original article to the o
 
 | Pattern    | D          | D(adj)     | D(w)       | D(s)       | D[^1]      | D(adj)[^1] | D[^2]      | D(adj)[^2] | D(w)[^2]   | D(s)[^2]   |
 |------------|------------|------------|------------|------------|------------|------------|------------|------------|------------|------------|
-|            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
+| ![Image]([https://sites.google.com/site/hongseongyun/_/rsrc/1377670736667/seg/pattern_1.png])
+             | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
@@ -187,6 +188,8 @@ The table below compares the segregation values in the original article to the o
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 |            | 1.00       | 0.94       | 0.94       | 0.95       | 1.00       | 0.94       | 1.00       | 0.94       | 0.94       | 0.95       |
 
+
+![Image](src)
 
 [^1]: Morrill
 
@@ -194,7 +197,7 @@ The table below compares the segregation values in the original article to the o
 
 **Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
+[Link](url) and 
 ```
 
 For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
