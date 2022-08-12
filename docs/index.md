@@ -6,15 +6,35 @@ You can use the [editor on GitHub](https://github.com/syunhong/seg/edit/master/d
 
 Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
-# Hypothetical patterns of segregation
+## Hypothetical patterns of segregation
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+The seg package contains a sample data set of eight different distributions of the population for testing purpose. The data set itself is a simple data frame but it can be displayed on a 10-by-10 grid to reproduce the hypothetical segregation patterns used by Morrill (1991) and Wong (1993).
 
-```markdown
-Syntax highlighted code block
+```
+library(seg)
+# Load the sample data set into the current workspace
+data(segdata)
 
+# Create a 10-by-10 grid to display the data set
+grd <- GridTopology(cellcentre.offset=c(0.5,0.5),
+                    cellsize=c(1,1), cells.dim=c(10,10))
+grd.sp <- as.SpatialPolygons.GridTopology(grd)
 
-# Index of dissimilarity, D, and its spatial counterparts
+# Display the eight different patterns on one page
+par(mfrow = c(2, 4), mar = c(0, 1, 0, 1))
+for (i in 1:8) {
+  idx <- 2 * i
+  full <- segdata[,(idx-1)] == 100
+  half <- segdata[,(idx-1)] == 50
+  plot(grd.sp)
+  plot(grd.sp[full,], col = "Black", add = TRUE)
+  if (any(half))
+    plot(grd.sp[half,], col = "Grey", add = TRUE)
+  text(5, 11.5, labels = paste("segdata[,", idx-1, ":", idx, "]", sep = ""))
+}
+```
+
+## Index of dissimilarity, D, and its spatial counterparts
 
 - Bulleted
 - List
