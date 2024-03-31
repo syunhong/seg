@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Function 'deseg'
 #
-# Author: Seong-Yun Hong <hong.seongyun@gmail.com>
+# Author: Seong-Yun Hong <syhong@khu.ac.kr>
+# Last update: 2024-03-30
 # ------------------------------------------------------------------------------
 deseg <- function(x, data, smoothing = "kernel", nrow = 100, ncol = 100, 
   window, sigma, verbose = FALSE) {

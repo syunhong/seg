@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Internal function 'conprof.calc'
 #
-# Author: Seong-Yun Hong <hong.seongyun@gmail.com>
+# Author: Seong-Yun Hong <syhong@khu.ac.kr>
+# Last update: 2024-03-30
 # ------------------------------------------------------------------------------
 conprof.calc <- function(data, grpID, n = 999) {
   

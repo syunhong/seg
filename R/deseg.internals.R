@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Internal functions used by 'deseg'
 #
-# Author: Seong-Yun Hong <hong.seongyun@gmail.com>
+# Author: Seong-Yun Hong <syhong@khu.ac.kr>
+# Last update: 2024-03-30
 # ------------------------------------------------------------------------------
 .decomp <- function(data) {
 

@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Function 'conprof'
 #
-# Author: Seong-Yun Hong <hong.seongyun@gmail.com>
+# Author: Seong-Yun Hong <syhong@khu.ac.kr>
+# Last update: 2024-03-30
 # ------------------------------------------------------------------------------
 conprof <- function(data, grpID = 1, n = 999, graph = TRUE, add = FALSE, ...) {
 

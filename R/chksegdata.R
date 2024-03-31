@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Internal function 'chksegdata'
 #
-# Author: Seong-Yun Hong <hong.seongyun@gmail.com>
+# Author: Seong-Yun Hong <syhong@khu.ac.kr>
+# Last update: 2024-03-30
 # ------------------------------------------------------------------------------
 chksegdata <- function(x, data) {
 
@@ -13,25 +14,27 @@ chksegdata <- function(x, data) {
   # STEP 1. CHECK 'x'
   #
   # ----------------------------------------------------------------------------
-  # (1) If 'x' is an object of class "Spatial" or one that extends the class
-  # (e.g., SpatialPoints), then do the following:
+  # (1) If 'x' is an object of class "sf", then do the following:
   # ----------------------------------------------------------------------------
-  if (inherits(x, "Spatial")) {   
-    message(fn, ": 'x' is an object of class \"Spatial\"")
-    coords <- try(coordinates(x), silent = TRUE)
+  if (inherits(x, "sf")) {   
+    message(fn, ": 'x' is an object of class \"sf\"")
+    coords <- try(x |> st_geometry() |> st_centroid(), silent = TRUE)
     if (inherits(coords, "try-error"))
       stop("failed to extract coordinates from 'x'", call. = FALSE)
+    coords <- do.call(rbind, coords)
     message(fn, ": ", nrow(coords), " coordinates extracted from 'x'")
     
     if (missing(data)) {
-      data <- try(as.matrix(x@data), silent = TRUE) 
+      data <- try(st_drop_geometry(x), silent = TRUE) 
       if (inherits(data, "try-error"))
         stop("'data' is missing, with no default", call. = FALSE)
       message(fn, ": 'data' is missing, use the one attached to 'x'")
-    } else {
-      data <- as.matrix(data)
     }
     
+    data <- try(as.matrix(data), silent = TRUE)
+    if (inherits(data, "try-error"))
+      stop("failed to coerce 'data' to matrix", call. = FALSE)
+
     message(fn, ": check if 'data' has any NA values")
     removeNA <- which(apply(data, 1, function(z) any(is.na(z))))
     if (length(removeNA) > 0) {
@@ -41,7 +44,7 @@ chksegdata <- function(x, data) {
     }
     
     message(fn, ": retrieves projection information from 'x'")
-    proj4string <- as.character(x@proj4string@projargs)
+    proj4string <- st_crs(auck)$proj4string
   }
   
   # ----------------------------------------------------------------------------
