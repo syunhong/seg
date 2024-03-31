@@ -1,4 +1,4 @@
-.d.adjust<- function(data, nb) {
+.spatial_adj <- function(data, nb) {
   
   if (!is.matrix(nb))
     stop("'nb' must be a matrix", call. = FALSE)
@@ -38,7 +38,13 @@
   as.vector(spstr)
 }
 
-.use.spdep <- function(x, data, p2n.args, n2m.args, verbose) {
+
+# ******************************************************************************
+# 
+# .use_contiguity()
+#
+# ******************************************************************************
+.use_contiguity <- function(x, data, queen, verbose) {
   speffect <- NA
   if (requireNamespace("spdep", quietly = TRUE)) {
     if (verbose) {
@@ -46,25 +52,9 @@
       message("attempting to calculate Morrill's D(adj)")
     }
     
-    if (missing(p2n.args)) {
-      p2n.args <- list(pl = x)
-    } else {
-      if (is.null(p2n.args$pl))
-        p2n.args$pl <- x
-    }
-    grd.nb <- do.call("spdep::poly2nb", p2n.args)
-    
-    if (missing(n2m.args)) {
-      n2m.args <- list(neighbours = grd.nb)
-    } else {
-      if (is.null(n2m.args$neighbours))
-        n2m.args$neighbours <- grd.nb
-      if (is.null(n2m.args$style))
-        n2m.args$style <- "B"
-    }
-    grd.nb <- do.call("spdep::nb2mat", n2m.args)
+    grd.nb <- poly2nb(x, queen = queen) |> nb2mat(style = "B")
     grd.nb <- grd.nb / sum(grd.nb)
-    speffect <- .d.adjust(data, grd.nb)
+    speffect <- .spatial_adj(data, grd.nb)
   } 
   
   else if (verbose) {
@@ -74,55 +64,122 @@
   speffect
 }
 
-.use.spgrass6 <- function(x, data, wVECT.args, v2n.args, verbose) {
-  speffect <- rep(NA, 2)
-  if (requireNamespace("spgrass6", quietly = TRUE) & 
-      requireNamespace("rgdal", quietly = TRUE) & 
-      requireNamespace("spdep", quietly = TRUE)) {
+# ******************************************************************************
+# 
+# .use_common_boundary()
+#
+# ******************************************************************************
+.use_common_boundary <- function(x, data, verbose) {
+  
+  # Initialise the output vector
+  result <- rep(NA, 2)
+  
+  # Check if 'terra' is available on user's computer
+  if (requireNamespace("terra", quietly = TRUE)) {
     if (verbose) {
-      message("library 'spgrass6' and 'rgdal' appear to be available")
-      message("attempting to calculate Wong's D(w) and D(s)")
+      message("'terra' available")
+      message("calculate Wong's D(w) and D(s)...")
+    }
+  } else {
+    if (verbose) {
+      message("'terra' not available")
+      message("cannot calculate Wong's D(w) and D(s)...")
     }
     
-    if (!("SpatialPolygonsDataFrame" %in% is(x)))
-      x <- SpatialPolygonsDataFrame(x, as.data.frame(data))
-
-    if (missing(wVECT.args)) {
-      wVECT.args <- list(SDF = x, vname = "tmp")
-    } else {
-      if (is.null(wVECT.args$SDF))
-        wVECT.args$SDF <- x
-      if (is.null(wVECT.args$vname))
-        wVECT.args$vname <- "tmp"
-    }
-    do.call(spgrass6::writeVECT6, wVECT.args)
-    
-    if (missing(v2n.args)) {
-      v2n.args <- list(vname = wVECT.args$vname)
-    } else {
-      if (is.null(v2n.args$vname))
-      v2n.args$vname <- wVECT.args$vname
-    }
-    sl <- do.call(spgrass6::vect2neigh, v2n.args)
-    sl.mat <- spdep::listw2mat(spdep::sn2listw(sl))
-    sl.mat <- sl.mat / sum(sl.mat)  
-    speffect[1] <- .d.adjust(data, sl.mat)
-    
-    A <- unlist(lapply(slot(x, "polygons"), function(z) slot(z, "area")))
-    P <- attr(sl, "total") - attr(sl, "external")
-    PAR <- P/A
-    maxPAR <- max(PAR)
-    
-    PAR.mat <- matrix(NA, nrow = length(PAR), ncol = length(PAR))
-    for (i in 1:length(PAR)) {
-      for (j in 1:length(PAR))
-        PAR.mat[i,j] <- ((PAR[i] + PAR[j])/2) / maxPAR
-    }
-    
-    speffect[2] <- .d.adjust(data, sl.mat * PAR.mat)   
-  } else if (verbose) {
-    message("failed to load 'spgrass6' or 'rgdal'")
+    return(result)
   }
   
-  speffect
+  common_borders <- try(x |> vect() |> sharedPaths() |> st_as_sf(), 
+                        silent = TRUE)
+  if (inherits(common_borders, "try-error"))
+    stop("failed to find common boundaries in 'x'", call. = FALSE)
+  common_lengths <- st_length(common_borders)
+  
+  len_mat <- matrix(0, nrow = nrow(x), ncol = nrow(x))
+  
+  rowID <- unique(common_borders$id1)
+  for (i in 1:length(rowID)) {
+    INDEX <- (common_borders$id1 == rowID[i])
+    colID <- common_borders$id2[INDEX]
+    sl <- common_lengths[INDEX]
+    len_mat[rowID[i], colID] <- sl
+    len_mat[colID, rowID[i]] <- sl
+  }
+  
+  len_mat <- len_mat / sum(len_mat)  
+  result[1] <- .spatial_adj(data, len_mat)
+    
+  
+  A <- try(st_area(x), silent = TRUE)
+  if (inherits(A, "try-error"))
+    stop("failed to compute areas of the polygons in 'x'", call. = FALSE)
+
+  P <- apply(len_mat, 1, sum)
+  PAR <- P/A
+  maxPAR <- max(PAR)
+    
+  PAR.mat <- matrix(NA, nrow = length(PAR), ncol = length(PAR))
+  for (i in 1:length(PAR)) {
+    for (j in 1:length(PAR))
+      PAR.mat[i,j] <- ((PAR[i] + PAR[j])/2) / maxPAR
+  }
+    
+  result[2] <- .spatial_adj(data, len_mat * PAR.mat)
+  result
 }
+
+
+
+# .use.spgrass6 <- function(x, data, wVECT.args, v2n.args, verbose) {
+#   speffect <- rep(NA, 2)
+#   if (requireNamespace("spgrass6", quietly = TRUE) & 
+#       requireNamespace("rgdal", quietly = TRUE) & 
+#       requireNamespace("spdep", quietly = TRUE)) {
+#     if (verbose) {
+#       message("library 'spgrass6' and 'rgdal' appear to be available")
+#       message("attempting to calculate Wong's D(w) and D(s)")
+#     }
+#     
+#     if (!("SpatialPolygonsDataFrame" %in% is(x)))
+#       x <- SpatialPolygonsDataFrame(x, as.data.frame(data))
+# 
+#     if (missing(wVECT.args)) {
+#       wVECT.args <- list(SDF = x, vname = "tmp")
+#     } else {
+#       if (is.null(wVECT.args$SDF))
+#         wVECT.args$SDF <- x
+#       if (is.null(wVECT.args$vname))
+#         wVECT.args$vname <- "tmp"
+#     }
+#     do.call(spgrass6::writeVECT6, wVECT.args)
+#     
+#     if (missing(v2n.args)) {
+#       v2n.args <- list(vname = wVECT.args$vname)
+#     } else {
+#       if (is.null(v2n.args$vname))
+#       v2n.args$vname <- wVECT.args$vname
+#     }
+#     sl <- do.call(spgrass6::vect2neigh, v2n.args)
+#     sl.mat <- spdep::listw2mat(spdep::sn2listw(sl))
+#     sl.mat <- sl.mat / sum(sl.mat)  
+#     speffect[1] <- .d.adjust(data, sl.mat)
+#     
+#     A <- unlist(lapply(slot(x, "polygons"), function(z) slot(z, "area")))
+#     P <- attr(sl, "total") - attr(sl, "external")
+#     PAR <- P/A
+#     maxPAR <- max(PAR)
+#     
+#     PAR.mat <- matrix(NA, nrow = length(PAR), ncol = length(PAR))
+#     for (i in 1:length(PAR)) {
+#       for (j in 1:length(PAR))
+#         PAR.mat[i,j] <- ((PAR[i] + PAR[j])/2) / maxPAR
+#     }
+#     
+#     speffect[2] <- .d.adjust(data, sl.mat * PAR.mat)   
+#   } else if (verbose) {
+#     message("failed to load 'spgrass6' or 'rgdal'")
+#   }
+#   
+#   speffect
+# }
+

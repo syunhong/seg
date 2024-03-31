@@ -1,22 +1,23 @@
 # ------------------------------------------------------------------------------
-# Function 'dissim'
+# Function 'dissim()'
 #
-# Author: Seong-Yun Hong <hong.seongyun@gmail.com>
-# Last update: 24 May 2014
+# Author: Seong-Yun Hong <syhong@khu.ac.kr>
+# Last update: 2024-03-30
 # Depends: -
 # ------------------------------------------------------------------------------
 dissim <- function(x, data, nb, adjust = FALSE, p2n.args, n2m.args, 
-                   wVECT.args, v2n.args, verbose = FALSE) {
+                   verbose = FALSE) {
 
-  if (!missing(x)) {
-    if (inherits(x, "SpatialPolygons"))
-      data <- suppressMessages(chksegdata(x, data))$data
-    else {
-      msg <- paste("'x' is neither \"SpatialPolygons\"",
-                   "nor \"SpatialPolygonsDataFrame\"")
-      stop(msg, call. = FALSE)
-    }
-  }
+  # if (!missing(x)) {
+  #   if (inherits(x, "SpatialPolygons"))
+  #     data <- suppressMessages(chksegdata(x, data))$data
+  #   else {
+  #     msg <- paste("'x' is neither \"SpatialPolygons\"",
+  #                  "nor \"SpatialPolygonsDataFrame\"")
+  #     stop(msg, call. = FALSE)
+  #   }
+  # }
+  data <- chksegdata(x)$data
 
   if (ncol(data) > 2) {
     warning("'data' has more than two columns; only the first two are used",
@@ -39,15 +40,15 @@ dissim <- function(x, data, nb, adjust = FALSE, p2n.args, n2m.args,
   if (!missing(x) & adjust) {
     userpkg <- .packages(all.available = TRUE)
     if ("spdep" %in% userpkg) {
-      tmp <- tryCatch(.use.spdep(x, data, p2n.args, n2m.args, verbose),
+      tmp <- tryCatch(.use_contiguity(x, data, queen = TRUE, verbose),
                       error = function(e) print(e))
       if (is.numeric(tmp))
         out$dm <- out$d - tmp
       else if (verbose)
         message("failed to calculate D(adj)")
       
-      if (all(c("spgrass6", "rgdal") %in% userpkg)) {
-        tmp <- tryCatch(.use.spgrass6(x, data, wVECT.args, v2n.args, verbose),
+      if (all(c("terra") %in% userpkg)) {
+        tmp <- tryCatch(.use_common_boundary(x, data, verbose),
                         error = function(e) print(e))
         if (is.numeric(tmp[1]))
           out$dw <- out$d - tmp[1]
