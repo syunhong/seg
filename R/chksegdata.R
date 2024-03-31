@@ -44,7 +44,7 @@ chksegdata <- function(x, data) {
     }
     
     message(fn, ": retrieves projection information from 'x'")
-    proj4string <- st_crs(auck)$proj4string
+    proj4string <- st_crs(x)$proj4string
   }
   
   # ----------------------------------------------------------------------------
