@@ -59,7 +59,7 @@ Reardon, S. F., Farrell, C. R., Matthews, S. A., O'Sullivan, D., Bischoff, K., a
 data(segdata)
 grd <- GridTopology(cellcentre.offset=c(0.5,0.5),
                     cellsize=c(1,1), cells.dim=c(10,10))
-grd.sp <- as.SpatialPolygons.GridTopology(grd)
+grd.sp <- as.SpatialPolygons.GridTopology(grd) |> sf::st_as_sf()
 test.df <- segdata[,1:2]
 
 # no spatial smoothing
@@ -69,10 +69,12 @@ print(xx1, digits = 3)
 # plots the values in the slot 'data'
 spplot(xx1, main = "No spatial smoothing")
 
+\dontrun{
 # smoothes the data points
 xx2 <- spseg(grd.sp, data = test.df, smoothing = "equal")
 print(xx2, digits = 3)
 spplot(xx2, main = "Equal")
+}
 
 # uses the kernel smoothing of the data points
 xx3 <- spseg(grd.sp, data = test.df, smoothing = "kernel", 

@@ -1,6 +1,6 @@
 useDynLib(seg, .registration = TRUE)
 
-import(methods, stats, sp)
+import(methods, stats, sp, sf)
 importFrom(splancs, kernel2d)
 importFrom("graphics", "axis", "lines", "points")
 importFrom("utils", "combn")

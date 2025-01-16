@@ -7,7 +7,7 @@ Calculates the index of dissimilarity proposed by Duncan and Duncan (1955). If \
 }
 \usage{
 dissim(x, data, nb, adjust = FALSE, p2n.args, n2m.args, 
-       wVECT.args, v2n.args, verbose = FALSE)
+       verbose = FALSE)
 seg(data, nb)
 }
 \arguments{
@@ -17,8 +17,6 @@ seg(data, nb)
   \item{adjust}{logical. If TRUE, and if \sQuote{x} is given, the index of dissimilarity is adjusted according to the suggestions of Morrill (1991) and Wong (1993), depending on packages installed on the system. See \sQuote{Details} for more information. Ignore if \sQuote{x} is not given.}
   \item{p2n.args}{an optional \code{list} of arguments to be passed to \code{poly2nb}. To avoid confusion, it is best to name all objects in the list in a way that they exactly match the argument names in \code{poly2nb}.}
   \item{n2m.args}{an optional \code{list} of arguments to be passed to \code{nb2mat}.}
-  \item{wVECT.args}{an optional \code{list} of arguments to be passed to \code{writeVECT6}.}
-  \item{v2n.args}{an optional \code{list} of arguments to be passed to \code{vect2neigh}.}
   \item{verbose}{logical. If TRUE, print the current stage of the computation and time spent on each job to the screen.}
 }
 

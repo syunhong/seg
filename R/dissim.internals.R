@@ -52,7 +52,7 @@
       message("attempting to calculate Morrill's D(adj)")
     }
     
-    grd.nb <- poly2nb(x, queen = queen) |> nb2mat(style = "B")
+    grd.nb <- spdep::poly2nb(x, queen = queen) |> spdep::nb2mat(style = "B")
     grd.nb <- grd.nb / sum(grd.nb)
     speffect <- .spatial_adj(data, grd.nb)
   } 
@@ -89,7 +89,7 @@
     return(result)
   }
   
-  common_borders <- try(x |> vect() |> sharedPaths() |> st_as_sf(), 
+  common_borders <- try(x |> terra::vect() |> terra::sharedPaths() |> st_as_sf(), 
                         silent = TRUE)
   if (inherits(common_borders, "try-error"))
     stop("failed to find common boundaries in 'x'", call. = FALSE)

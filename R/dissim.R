@@ -63,6 +63,7 @@ dissim <- function(x, data, nb, adjust = FALSE, p2n.args, n2m.args,
   }
   
   if (!missing(nb))
-    out$user <- out$d - .d.adjust(data, nb)
+#    out$user <- out$d - .d.adjust(data, nb)
+     warning("nb not used: rgrass6 (deprecated) needed")
   out
 }

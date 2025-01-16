@@ -6,8 +6,9 @@ Author: Seong-Yun Hong <syhong@khu.ac.kr> and
   David O'Sullivan <david.osullivan@vuw.ac.nz>, with code contributions by 
   Benjamin Jarvis and Changlock Choi
 Maintainer: Seong-Yun Hong <syhong@khu.ac.kr>
-Depends: R (>= 4.2.0), methods, stats, sf
-Suggests: terra, splancs
+Depends: R (>= 4.2.0), methods, stats, sp
+Imports: sf, spdep, splancs
+Suggests: terra
 Description: Measuring spatial segregation. The methods implemented in this 
         package include White's P index (1983) <doi:10.1086/227768>, 
         Morrill's D(adj) (1991), Wong's D(w) and D(s) (1993) 
