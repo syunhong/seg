@@ -8,22 +8,21 @@ setClass(Class = "SegLocal",
                    proj4string = "CRS"))
 
 setValidity(Class = "SegLocal", 
-  method = function(object) {
-    if (ncol(object@coords) != 2 || !is.numeric(object@coords))
-      paste("'coords' must be a numeric matrix with two columns, x and y")
-    else if (ncol(object@data) < 2 || !is.numeric(object@data))
-      paste("'data' must be a numeric matrix with at least two columns")
-    else if (nrow(object@data) != nrow(object@coords))
-      paste("'data' must have the same number of rows as 'coords'")
-    else if (any(dim(object@env) != dim(object@data)))
-      paste("'env' must be a matrix with the same dimensions as 'data'")
-    else if (!is.numeric(object@env))
-      paste("'env' must be a numeric matrix")
-    else if (class(object@proj4string) != "CRS")
-      paste("'proj4string' is not a valid CRS object")
-    else
-      TRUE
-  })
+            method = function(object) {
+              if (!is.matrix(object@coords) || ncol(object@coords) != 2 || !is.numeric(object@coords))
+                return("Error: 'coords' must be a numeric matrix with two columns (x, y).")
+              if (!is.matrix(object@data) || ncol(object@data) < 2 || !is.numeric(object@data))
+                return("Error: 'data' must be a numeric matrix with at least two columns.")
+              if (nrow(object@data) != nrow(object@coords))
+                return("Error: 'data' must have the same number of rows as 'coords'.")
+              if (!is.matrix(object@env) || any(dim(object@env) != dim(object@data)))
+                return("Error: 'env' must be a matrix with the same dimensions as 'data'.")
+              if (!is.numeric(object@env))
+                return("Error: 'env' must be a numeric matrix.")
+              if (!inherits(object@proj4string, "CRS"))
+                return("Error: 'proj4string' must be a valid CRS object.")
+              TRUE
+            })
 
 SegLocal <- function(coords, data, env, proj4string = CRS(as.character(NA))) {
   new("SegLocal", coords = coords, data = data, env = env,

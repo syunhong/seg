@@ -5,38 +5,51 @@
 # ------------------------------------------------------------------------------
 localenv.get <- function(sprel, data, power, useExp, scale, maxdist, tol) {
   
-  grps <- colnames(data); rows <- rownames(data)
+  grps <- colnames(data)
+  rows <- rownames(data)
   
+  # Case 1: If 'sprel' is an 'nb' (neighbor object)
   if (inherits(sprel, "nb")) {
-    xmat <- spdep::nb2mat(sprel, style = "W") # needs the package 'spdep'
+    xmat <- spdep::nb2mat(sprel, style = "W")  # Convert nb to weight matrix
     if (nrow(xmat) != nrow(data)) 
       stop("'data' must have the same number of rows as 'sprel'", call. = FALSE)
-    env <- xmat %*% data
+    env <- xmat %*% data  # Matrix multiplication for spatial weights
   }
   
+  # Case 2: If 'sprel' is a distance matrix
   else if (inherits(sprel, "dist")) {
-    sprel <- as.matrix(sprel)
+    sprel <- as.matrix(sprel)  # Convert 'dist' object to matrix
     if (nrow(sprel) != nrow(data)) 
       stop("'data' must have the same number of rows as 'sprel'", call. = FALSE)
+    
     env <- matrix(nrow = nrow(data), ncol = ncol(data))
-    for (i in 1:nrow(data)) {
+    
+    for (i in seq_len(nrow(data))) {
       if (useExp)
-        weight <- exp(power * sprel[i,] * -1)
+        weight <- exp(power * sprel[i, ] * -1)  # Exponential decay weighting
       else
-        weight <- 1/(sprel[i,] + tol)^power
+        weight <- 1 / (sprel[i, ] + tol)^power  # Power-law weighting
+      
       if (maxdist >= 0)
-        weight[which(sprel[i,] > maxdist)] <- 0
-      env[i,] <- apply(data, 2, function(z) sum(z * weight)/sum(weight))
+        weight[sprel[i, ] > maxdist] <- 0  # Zero out weights beyond max distance
+      
+      env[i, ] <- colSums(data * weight) / sum(weight)  # Use colSums() for efficiency
     }
   } 
   
+  # Case 3: If 'sprel' is a coordinate matrix
   else {
     if (nrow(sprel) != nrow(data))
       stop("'data' must have the same number of rows as 'sprel'", call. = FALSE)
-    xval <- sprel[,1]; yval <- sprel[,2]
-    dim <- ncol(data); data <- as.vector(data)
+    
+    xval <- sprel[, 1]
+    yval <- sprel[, 2]
+    dim <- ncol(data)
+    data <- as.vector(data)
+    
     env <- .Call("envconstruct", xval, yval, data, as.integer(dim), power, 
                  as.integer(useExp), as.integer(scale), maxdist, tol)
+    
     # --------------------------------------------------------------------------
     # R version 'envconstruct()'
     # --------------------------------------------------------------------------
@@ -62,8 +75,10 @@ localenv.get <- function(sprel, data, power, useExp, scale, maxdist, tol) {
     #   return(env)
     # }
     # --------------------------------------------------------------------------
+    
   }
   
-  colnames(env) <- grps; rownames(env) <- rows
+  colnames(env) <- grps
+  rownames(env) <- rows
   env
 }

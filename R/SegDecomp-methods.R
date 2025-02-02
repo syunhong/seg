@@ -4,29 +4,22 @@
 # Author: Seong-Yun Hong <hong.seongyun@gmail.com>
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
-# Coercion methods
-# ------------------------------------------------------------------------------
-setAs("SegDecomp", "SpatialPoints", 
+setAs("SegDecomp", "sf", 
       function(from) {
         validObject(from)
-        SpatialPoints(coords = from@coords, proj4string = from@proj4string)       
+        st_as_sf(data.frame(from@data, geometry = st_sfc(st_multipoint(from@coords))), crs = st_crs(from@proj4string))
       })
 
 setAs("SegDecomp", "SpatialPointsDataFrame", 
       function(from) {
         validObject(from)
-        SpatialPointsDataFrame(coords = from@coords, 
-                               data = data.frame(from@data),
-                               proj4string = from@proj4string)      
+        st_as_sf(data.frame(from@data, geometry = st_sfc(st_multipoint(from@coords))), crs = st_crs(from@proj4string))
       })
 
 setAs("SegDecomp", "SpatialPixelsDataFrame", 
       function(from) {
         validObject(from)
-        SpatialPixelsDataFrame(points = from@coords, 
-                               data = data.frame(from@data),
-                               proj4string = from@proj4string)     
+        st_as_sf(data.frame(from@data, geometry = st_sfc(st_multipoint(from@coords))), crs = st_crs(from@proj4string))
       })
 
 setAs("SegDecomp", "vector", 
@@ -64,18 +57,22 @@ print.SegDecomp <- function(x, digits = getOption("digits"), ...) {
 }
 
 # ------------------------------------------------------------------------------
-# Plotting
+# Plotting (using ggplot2 instead of spplot)
 # ------------------------------------------------------------------------------
 setMethod("spplot", signature(obj = "SegDecomp"), function(obj, ...) {
   validObject(obj)
-  spO <- try(as(obj, "SpatialPixelsDataFrame"), silent = TRUE)
-  if (class(spO) == "try-error") {
-    warning("failed to convert 'obj' to SpatialPixelsDataFrame", call. = FALSE)
-    
-    spO <- try(as(obj, "SpatialPointsDataFrame"), silent = TRUE)
-    if (class(spO) == "try-error")
-      stop("failed to convert 'obj' to SpatialPointsDataFrame", call. = FALSE)
+  
+  # Convert to sf object
+  sfObj <- try(as(obj, "sf"), silent = TRUE)
+  if (inherits(sfObj, "try-error")) {
+    stop("failed to convert 'obj' to sf object", call. = FALSE)
   }
   
-  spplot(spO, ...)
+  # Use ggplot2 to plot (alternative: tmap)
+  library(ggplot2)
+  ggplot(sfObj) +
+    geom_sf(aes(fill = obj@d), color = "black") +
+    scale_fill_viridis_c() +
+    theme_minimal() +
+    labs(title = "Segregation Decomposition", fill = "D Values")
 })

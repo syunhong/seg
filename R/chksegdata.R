@@ -2,103 +2,58 @@
 # Internal function 'chksegdata'
 #
 # Author: Seong-Yun Hong <syhong@khu.ac.kr>
-# Last update: 2024-03-30
+# Last update: 2025-02-02
 # ------------------------------------------------------------------------------
-chksegdata <- function(x, data) {
-
-  begTime <- Sys.time(); fn <- match.call()[[1]]
-  proj4string <- as.character(NA)
+isp <- function(x, data, nb, fun, verbose = FALSE, ...) {
   
-  # ----------------------------------------------------------------------------
-  #
-  # STEP 1. CHECK 'x'
-  #
-  # ----------------------------------------------------------------------------
-  # (1) If 'x' is an object of class "sf", then do the following:
-  # ----------------------------------------------------------------------------
-  if (inherits(x, "sf")) {   
-    message(fn, ": 'x' is an object of class \"sf\"")
-    coords <- try(x |> st_geometry() |> st_centroid(), silent = TRUE)
-    if (inherits(coords, "try-error"))
-      stop("failed to extract coordinates from 'x'", call. = FALSE)
-    coords <- do.call(rbind, coords)
-    message(fn, ": ", nrow(coords), " coordinates extracted from 'x'")
-    
-    if (missing(data)) {
-      data <- try(st_drop_geometry(x), silent = TRUE) 
-      if (inherits(data, "try-error"))
-        stop("'data' is missing, with no default", call. = FALSE)
-      message(fn, ": 'data' is missing, use the one attached to 'x'")
-    }
-    
-    data <- try(as.matrix(data), silent = TRUE)
-    if (inherits(data, "try-error"))
-      stop("failed to coerce 'data' to matrix", call. = FALSE)
-
-    message(fn, ": check if 'data' has any NA values")
-    removeNA <- which(apply(data, 1, function(z) any(is.na(z))))
-    if (length(removeNA) > 0) {
-      data <- data[-removeNA,]
-      coords <- coords[-removeNA,]
-      message(fn, ": ", length(removeNA), "NA(s) removed")
-    }
-    
-    message(fn, ": retrieves projection information from 'x'")
-    proj4string <- st_crs(x)$proj4string
-  }
-  
-  # ----------------------------------------------------------------------------
-  # (2) If 'x' is an object of class "ppp":
-  # ----------------------------------------------------------------------------
-  else if (is(x, "ppp")) {
-    message(fn, ": 'x' is an object of class \"ppp\"")
-    coords <- cbind(x = x$x, y = x$y)
-    if (missing(data)) {
-      if (is.null(x$marks)) {
-        stop("'data' is missing, with no default", call. = FALSE)
-      } else {
-        data <- as.matrix(x$marks)
-        message(fn, ": 'data' is missing, use the one attached to 'x'")
-      }
-    } else {
-      data <- as.matrix(data)
-    }
-  }
-  
-  # ----------------------------------------------------------------------------
-  # (3) If 'x' is a n * 2 matrix or data frame object:
-  # ----------------------------------------------------------------------------
-  else if (is.matrix(x) || is.data.frame(x)) {
-    message(fn, ": 'x' is an object of class \"matrix\" or \"data.frame\"")      
-    coords <- as.matrix(x)
-    if (ncol(coords) != 2 || !is.numeric(coords))
-      stop("'x' must be a numeric matrix with two columns", call. = FALSE)
-    if (missing(data))
-      stop("'data' is missing, with no default", call. = FALSE)
-    else
-      data <- as.matrix(data)
-  }
-  
-  # ----------------------------------------------------------------------------
-  # (4) If 'x' is not one of the supporting classes:
-  # ----------------------------------------------------------------------------
+  # Process input data using chksegdata()
+  if (verbose)
+    tmp <- chksegdata(x, data)
   else
-    stop("invalid object 'x'", call. = FALSE)
+    tmp <- suppressMessages(chksegdata(x, data))
+  coords <- tmp$coords
+  pdf <- tmp$data
+  rm(tmp)
   
-  # ----------------------------------------------------------------------------
-  #
-  # STEP 2. CHECK 'data'
-  #
-  # ----------------------------------------------------------------------------
-  if (ncol(data) < 2 || !is.numeric(data))
-    stop("'data' must be a numeric matrix with at least two columns", 
-         call. = FALSE)
-  else if (nrow(data) != nrow(coords))
+  # Verify 'coords' and 'data'
+  if (ncol(pdf) < 2)
+    stop("'data' must be a matrix with at least two columns", call. = FALSE)
+  else if (!is.numeric(pdf))
+    stop("'data' must be a numeric matrix", call. = FALSE)
+  else if (nrow(pdf) != nrow(coords))
     stop("'data' must have the same number of rows as 'x'", call. = FALSE)
-
-  tt <- as.numeric(difftime(Sys.time(), begTime, units = "sec"))
-  message(fn, ": done! [", tt, " seconds]")
-    
-  colnames(coords) <- c("x", "y")
-  list(coords = coords, data = data, proj4string = proj4string)
+  
+  # Generate distance matrix if 'nb' is missing
+  if (missing(nb))
+    nb <- as.matrix(dist(coords, ...))
+  
+  # Use default negative exponential function if 'fun' is missing
+  if (missing(fun))
+    fun <- function(z) exp(-z)
+  
+  # Process distance matrix
+  if (isSymmetric(nb)) {
+    pairID <- t(combn(1:nrow(nb), 2))  # Unique pairs
+    pairDist <- as.numeric(as.dist(nb))
+  } else {
+    pairID <- expand.grid(1:nrow(nb), 1:nrow(nb))
+    pairDist <- as.numeric(nb)
+  }
+  
+  VALID <- which(pairDist != 0)
+  pairID <- pairID[VALID,]
+  pairDist <- pairDist[VALID]
+  
+  # Compute spatial interaction effect
+  speffect <- fun(pairDist)
+  
+  pRow <- rowSums(pdf)  # Total population by census tracts
+  pCol <- colSums(pdf)  # Total population by groups
+  
+  pA <- sapply(1:ncol(pdf), function(i) {
+    sum(pdf[pairID[,1], i] * pdf[pairID[,2], i] * speffect) / pCol[i]
+  })
+  
+  sum(pA) / (sum(pRow[pairID[,1]] * pRow[pairID[,2]] * speffect) / sum(pCol))
 }
+

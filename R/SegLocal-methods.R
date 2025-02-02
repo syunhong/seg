@@ -7,38 +7,34 @@
 # ------------------------------------------------------------------------------
 # Coercion methods
 # ------------------------------------------------------------------------------
-setAs("SegLocal", "SpatialPoints", 
+setAs("SegLocal", "sf", 
       function(from) {
         validObject(from)
-        SpatialPoints(coords = from@coords, proj4string = from@proj4string)
+        st_as_sf(data.frame(from@data, geometry = st_sfc(st_multipoint(from@coords))), crs = st_crs(from@proj4string))
       })
 
 setAs("SegLocal", "SpatialPointsDataFrame", 
       function(from) {
         validObject(from)
-        SpatialPointsDataFrame(coords = from@coords, 
-                               data = data.frame(from@env),
-                               proj4string = from@proj4string)
+        st_as_sf(data.frame(from@data, geometry = st_sfc(st_multipoint(from@coords))), crs = st_crs(from@proj4string))
       })
 
 setAs("SegLocal", "SpatialPixelsDataFrame", 
       function(from) {
         validObject(from)
-        SpatialPixelsDataFrame(points = from@coords, 
-                               data = data.frame(from@env),
-                               proj4string = from@proj4string)
+        st_as_sf(data.frame(from@data, geometry = st_sfc(st_multipoint(from@coords))), crs = st_crs(from@proj4string))
       })
 
 setAs("SpatialPointsDataFrame", "SegLocal", 
       function(from) {
-        SegLocal(coords = from@coords, data = from@data, env = from@data, 
-                 proj4string = from@proj4string)
+        SegLocal(coords = st_coordinates(from), data = from@data, env = from@data, 
+                 proj4string = st_crs(from))
       })
 
 setAs("SpatialPolygonsDataFrame", "SegLocal", 
       function(from) {
-        SegLocal(coords = coordinates(from), data = from@data, 
-                 env = from@data, proj4string = from@proj4string)
+        SegLocal(coords = st_coordinates(from), data = from@data, 
+                 env = from@data, proj4string = st_crs(from))
       })
 
 # ------------------------------------------------------------------------------
@@ -49,7 +45,7 @@ setMethod("show", signature(object = "SegLocal"), function(object) {
   cat("Class                 :", class(object), "\n")
   cat("Number of data points :", nrow(object@coords), "\n")
   cat("Number of data columns:", ncol(object@data), "\n")
-  cat("Projection            :", object@proj4string@projargs, "\n")
+  cat("Projection            :", st_crs(object@proj4string)$wkt, "\n")
   cat("Slot names            :", slotNames(object), "\n")
 })
 
@@ -58,112 +54,82 @@ print.SegLocal <- function(x, ...) {
   cat("Class                 :", class(x), "\n")
   cat("Number of data points :", nrow(x@coords), "\n")
   cat("Number of data columns:", ncol(x@data), "\n")
-  cat("Projection            :", x@proj4string@projargs, "\n")
+  cat("Projection            :", st_crs(x@proj4string)$wkt, "\n")
   cat("Slot names            :", slotNames(x), "\n")
 }
 
 # ------------------------------------------------------------------------------
-# Plotting
+# Plotting (using ggplot2 instead of spplot)
 # ------------------------------------------------------------------------------
-plot.SegLocal <- function(x, which.col, main, ...) {
+plot.SegLocal <- function(x, which.col = 1:ncol(x@env), main = NULL, ...) {
   validObject(x)
-  xx <- x@coords[,1]
-  yy <- x@coords[,2]
-  env <- x@env
+  library(ggplot2)
   
-  if (missing(which.col))
-    which.col <- 1:ncol(env)
-  numPlot <- length(which.col) 
-  if (missing(main))
-    main <- paste("Data", 1:numPlot)
-  else if (length(main) < numPlot)
-    main <- rep(main, ceiling(numPlot/length(main)))
+  df <- as.data.frame(cbind(x@coords, x@env))
+  colnames(df) <- c("x", "y", colnames(x@env))
   
-  for (i in 1:numPlot) {
-    qq <- quantile(env[,i], probs = c(0.2, 0.4, 0.6, 0.8))
-    brks <- length(qq) + 1
-    size <- rep(brks, nrow(env))
-    for (j in 1:brks)
-      size[which(env[,i] <= qq[brks - j])] <- brks - j
-    plot(x = xx, y = yy, cex = size, main = main[i], ...)
-  }
+  if (is.null(main)) main <- paste("Data", which.col)
+  
+  ggplot(df, aes(x = x, y = y)) +
+    geom_point(aes(size = df[, which.col]), color = "blue", alpha = 0.6) +
+    scale_size_continuous(range = c(1, 6)) +
+    theme_minimal() +
+    labs(title = main, size = "Value")
 }
 
 points.SegLocal <- function(x, which.col = 1, ...) {
   validObject(x)
-  xx <- x@coords[,1]
-  yy <- x@coords[,2]
-  env <- x@env
+  library(ggplot2)
   
-  if (length(which.col) > 1)
-    warning("'which.col' has a length of > 1", call. = FALSE)
-  i <- which.col[1] 
+  df <- as.data.frame(cbind(x@coords, x@env))
+  colnames(df) <- c("x", "y", colnames(x@env))
   
-  qq <- quantile(env[,i], probs = c(0.2, 0.4, 0.6, 0.8))
-  brks <- length(qq) + 1
-  size <- rep(brks, nrow(env))
-  for (j in 1:brks)
-    size[which(env[,i] <= qq[brks - j])] <- brks - j
-  points(x = xx, y = yy, cex = size, ...)
+  if (length(which.col) > 1) warning("'which.col' has a length > 1", call. = FALSE)
+  
+  ggplot(df, aes(x = x, y = y)) +
+    geom_point(aes(size = df[, which.col]), color = "red", alpha = 0.6) +
+    scale_size_continuous(range = c(1, 6)) +
+    theme_minimal() +
+    labs(title = paste("Variable:", colnames(x@env)[which.col]), size = "Value")
 }
 
-setMethod("spplot", signature(obj = "SegLocal"), function(obj, ...) {
-  validObject(obj)
-  spO <- try(as(obj, "SpatialPixelsDataFrame"), silent = TRUE)
-  if (class(spO) == "try-error") {
-    warning("failed to convert 'obj' to SpatialPixelsDataFrame", call. = FALSE)
-    
-    spO <- try(as(obj, "SpatialPointsDataFrame"), silent = TRUE)
-    if (class(spO) == "try-error")
-      stop("failed to convert 'obj' to SpatialPointsDataFrame", call. = FALSE)
-  }
-  
-  spplot(spO, ...)
-})
-
 # ------------------------------------------------------------------------------
-# Utilities
+# Summary
 # ------------------------------------------------------------------------------
 summary.SegLocal <- function(object, ...) {
   validObject(object)
-  msg <- paste("An object of class \"", class(object), "\"\n", sep = "")
-  cat(msg)
+  cat("An object of class \"", class(object), "\"\n", sep = "")
   cat("Coordinates:\n")
-  tmp <- t(apply(object@coords, 2, range))
-  rownames(tmp) <- c("x", "y")
-  colnames(tmp) <- c("min", "max")
+  tmp <- apply(object@coords, 2, range)
   print(tmp)
-  if (is.na(object@proj4string@projargs)) {
+  
+  if (is.na(st_crs(object@proj4string)$wkt)) {
     cat("Is projected: FALSE\n")
   } else {
     cat("Is projected: TRUE\n")
-    cat("proj4string : [", object@proj4string@projargs, "]\n", sep = "")
+    cat("Projection  : ", st_crs(object@proj4string)$wkt, "\n")
   }
-    
+  
   cat("\nData values (%):\n")
-  tmp <- t(apply(object@data, 1, function(z) z/sum(z))) * 100
-  tmp <- apply(tmp, 2, function(z) summary(z, ...))
-  colnames(tmp) <- colnames(object@data)
-  print(tmp)
-
+  tmp <- t(apply(object@data, 1, function(z) z / sum(z))) * 100
+  print(apply(tmp, 2, summary, ...))
+  
   cat("\nLocal environment composition (%):\n")
-  tmp <- t(apply(object@env, 1, function(z) z/sum(z))) * 100
-  tmp <- apply(tmp, 2, function(z) summary(z, ...))
-  colnames(tmp) <- colnames(object@env)
-  print(tmp)
+  tmp <- t(apply(object@env, 1, function(z) z / sum(z))) * 100
+  print(apply(tmp, 2, summary, ...))
 }
 
+# ------------------------------------------------------------------------------
+# Updating
+# ------------------------------------------------------------------------------
 update.SegLocal <- function(object, coords, data, env, proj4string, ...) {
   validObject(object)
-  if (missing(coords))
-    coords <- object@coords  
-  if (missing(data))
-    data <- object@data
-  if (missing(env))
-    env <- object@env
-  if (missing(proj4string))
-    proj4string <- object@proj4string
-              
+  
+  if (missing(coords)) coords <- object@coords
+  if (missing(data)) data <- object@data
+  if (missing(env)) env <- object@env
+  if (missing(proj4string)) proj4string <- object@proj4string
+  
   SegLocal(coords, data, env, proj4string)
 }
 
