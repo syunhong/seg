@@ -1,22 +1,25 @@
 # ------------------------------------------------------------------------------
-# isp()
+# Function isp()
+#
+# Author: Seong-Yun Hong <syhong@khu.ac.kr>
+# Last update: 2025-02-02
 # ------------------------------------------------------------------------------
 isp <- function(x, data, nb, fun, verbose = FALSE, ...) {
 
-  # The input object 'x' can be either a class of 'Spatial' (or its associates)
-  # or 'data.frame'. Depending on the class of 'x', 'data' may not be required.
-  # The internal function 'chksegdata()' processes the information as required
-  # by the current function.
+  # The input object 'x' can be either a class of 'sf' or 'data.frame'. 
+  # Depending on the class of 'x', 'data' may not be required. The internal 
+  # function 'chksegdata()' processes the information as required by the 
+  # current function.
 
   # Process input data using chksegdata()
   if (verbose)
     tmp <- chksegdata(x, data)
   else
     tmp <- suppressMessages(chksegdata(x, data))
+  
   coords <- tmp$coords
   pdf <- tmp$data
-  rm(tmp)
-  
+
   # Verify 'coords' and 'data'
   if (ncol(pdf) < 2)
     stop("'data' must be a matrix with at least two columns", call. = FALSE)
