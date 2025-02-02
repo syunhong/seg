@@ -1,6 +1,5 @@
 \name{conprof}
 \alias{conprof}
-\alias{conprof.calc}
 \title{Concentration Profile}
 \description{
 Draws a graph that shows the pattern of residential concentration for a population group and calculates its summary statistic as suggested by Hong and Sadahiro (2013).
@@ -34,7 +33,7 @@ Seong-Yun Hong
 \references{
 Poulsen, M., Johnston, R., and Forrest J. (2002) Plural cities and ethnic enclaves: Introducing a measurement procedure for comparative study. \emph{International Journal of Urban and Regional Research}, \bold{26}, 229-243.
 
-Hong, S.-Y. and Sadahiro, Y. (2013) Measuring geographic segregation: A graph-based approach. \emph{Journal of Geographical Systems}, \bold{na}, na-na.
+Hong, S.-Y. and Sadahiro, Y. (2013) Measuring geographic segregation: A graph-based approach. \emph{Journal of Geographical Systems}, \bold{16}, 211-231.
 }
 \examples{
 xx <- runif(100) # random distribution
