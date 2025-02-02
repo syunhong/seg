@@ -4,78 +4,73 @@
 # Author: Seong-Yun Hong <hong.seongyun@gmail.com>
 # ------------------------------------------------------------------------------
 spatseg <- function(env, method = "all", useC = TRUE, negative.rm = FALSE, 
-  tol = .Machine$double.eps) {
+                    tol = .Machine$double.eps) {
   
-  validObject(env)
-  dd <- env@data + tol; ee <- env@env + tol
+  # Ensure data consistency
+  dd <- env@data + tol
+  ee <- env@env + tol
   
-  # Check if any of the original data values are 0 or less (often as a result
-  # of kernel smoothing)
-  negIDs <- apply(dd, 1, function(z) any(z <= 0))
-  if (sum(negIDs) > 0 && negative.rm) {
-    warning("rows with negative values have been removed", call. = FALSE)
-    dd <- dd[-which(negIDs),]
-    ee <- ee[-which(negIDs),]
-  } else if (sum(negIDs) > 0 && !negative.rm) {
-    warning("negative values have been replaced with 'tol'", call. = FALSE)
-    index <- (dd <= 0)
-    dd <- replace(dd, index, tol)
-    ee <- replace(ee, index, tol)
+  # Check and handle negative values (often from kernel smoothing)
+  negIDs <- rowSums(dd <= 0) > 0
+  if (sum(negIDs) > 0) {
+    if (negative.rm) {
+      warning("Rows with negative values have been removed", call. = FALSE)
+      dd <- dd[!negIDs, ]
+      ee <- ee[!negIDs, ]
+    } else {
+      warning("Negative values replaced with 'tol'", call. = FALSE)
+      dd[negIDs, ] <- tol
+      ee[negIDs, ] <- tol
+    }
   }
-
-  negIDs <- apply(ee, 1, function(z) any(z <= 0))
-  if (sum(negIDs) > 0 && negative.rm) {
-    warning("rows with negative values removed", call. = FALSE)
-    dd <- dd[-which(negIDs),]
-    ee <- ee[-which(negIDs),]
-  } else if (sum(negIDs) > 0 && !negative.rm) {
-    warning("negative values replaced with 'tol'", call. = FALSE)
-    index <- (ee <= 0)
-    dd <- replace(dd, index, tol)
-    ee <- replace(ee, index, tol)
-  }  
   
+  negIDs <- rowSums(ee <= 0) > 0
+  if (sum(negIDs) > 0) {
+    if (negative.rm) {
+      warning("Rows with negative values removed", call. = FALSE)
+      dd <- dd[!negIDs, ]
+      ee <- ee[!negIDs, ]
+    } else {
+      warning("Negative values replaced with 'tol'", call. = FALSE)
+      ee[negIDs, ] <- tol
+      dd[negIDs, ] <- tol
+    }
+  }
+  
+  # Select methods to compute
   method <- match.arg(method, c("exposure", "information", "diversity", 
                                 "dissimilarity", "all"), several.ok = TRUE)
   if ("all" %in% method)
     method <- c("exposure", "information", "diversity", "dissimilarity")
-
+  
   P <- matrix(0, nrow = 0, ncol = 0)
   H <- numeric(); R <- numeric(); D <- numeric()
   
   if (useC) {
+    # Use C-based implementation for performance
     m <- ncol(dd)
-    method <- c("exposure" %in% method, "information" %in% method,
-                "diversity" %in% method, "dissimilarity" %in% method)
+    method_flags <- c("exposure" %in% method, "information" %in% method,
+                      "diversity" %in% method, "dissimilarity" %in% method)
     tmp <- .Call("spsegIDX", as.vector(dd), as.vector(ee), 
-                          as.integer(m), as.integer(method))
-    results <- list(); n <- m^2
+                 as.integer(m), as.integer(method_flags))
+    results <- list()
+    n <- m^2
     if (!is.na(tmp[1])) {
       results$p <- matrix(tmp[1:n], ncol = m, byrow = TRUE)
       rownames(results$p) <- colnames(results$p) <- colnames(dd)
     }
-    if (!is.na(tmp[n+1]))
-      results$h <- tmp[n+1] 
-    if (!is.na(tmp[n+2]))
-      results$r <- tmp[n+2]
-    if (!is.na(tmp[n+3]))
-      results$d <- tmp[n+3]
-  }
-  
-  else {
-    # Number of population groups
+    if (!is.na(tmp[n+1])) results$h <- tmp[n+1] 
+    if (!is.na(tmp[n+2])) results$r <- tmp[n+2]
+    if (!is.na(tmp[n+3])) results$d <- tmp[n+3]
+  } else {
+    # Compute indices manually
     m <- ncol(dd)
-    # Total population in the study area
-    ptsSum <- sum(dd)
-    # Population of all groups at each data point
-    ptsRowSum <- apply(dd, 1, sum)
-    # Total population of each subgroup
-    ptsColSum <- apply(dd, 2, sum)
-    # Proportion of each subgroup
-    ptsProp <- ptsColSum / ptsSum
-    # Population proportion of each group at each local environment
-    envProp <- t(apply(ee, 1, function(z) z/sum(z)))
-
+    ptsSum <- sum(dd)  # Total population
+    ptsRowSum <- rowSums(dd)  # Population per location
+    ptsColSum <- colSums(dd)  # Population per group
+    ptsProp <- ptsColSum / ptsSum  # Group proportions
+    envProp <- ee / rowSums(ee)  # Proportion of each group per local environment
+    
     if ("exposure" %in% method) {
       P <- matrix(0, nrow = m, ncol = m)
       rownames(P) <- colnames(P) <- colnames(dd)
@@ -86,25 +81,26 @@ spatseg <- function(env, method = "all", useC = TRUE, negative.rm = FALSE,
         }
       }
     }
-
+    
     if ("information" %in% method) {
-      Ep <- apply(envProp, 1, function(z) sum(z * log(z, base = m))) * -1
-      E <- sum(ptsProp * log(ptsProp, base = m)) * -1
+      Ep <- -rowSums(envProp * log(envProp, base = m))
+      E <- -sum(ptsProp * log(ptsProp, base = m))
       H <- 1 - (sum(ptsRowSum * Ep) / (ptsSum * E))
     }
-
+    
     if ("diversity" %in% method) {
-      Ip <- apply(envProp, 1, function(z) sum(z * (1 - z)))
+      Ip <- rowSums(envProp * (1 - envProp))
       I <- sum(ptsProp * (1 - ptsProp))
       R <- 1 - sum((ptsRowSum * Ip) / (ptsSum * I))
     }
-
+    
     if ("dissimilarity" %in% method) {
       I <- sum(ptsProp * (1 - ptsProp))
       constant <- ptsRowSum / (2 * ptsSum * I)
-      Dp <- t(apply(envProp, 1, function(z) abs(z - ptsProp)))
-      D <- sum(apply(Dp, 2, function(z) sum(z * constant)))
+      Dp <- abs(envProp - ptsProp)
+      D <- sum(colSums(Dp * constant))
     }
+    
     results <- list(p = P, h = H, r = R, d = D)
   }
   

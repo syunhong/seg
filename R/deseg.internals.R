@@ -2,38 +2,50 @@
 # Internal functions used by 'deseg'
 #
 # Author: Seong-Yun Hong <syhong@khu.ac.kr>
-# Last update: 2024-03-30
+# Last update: 2025-02-02
 # ------------------------------------------------------------------------------
 .decomp <- function(data) {
-
-  dx <- apply(data, 1, sum) # total population in each row (i.e., area)
+  
+  if (inherits(data, "sf")) {
+    data <- st_drop_geometry(data)
+  }
+  
+  dx <- rowSums(data)
   removeID <- which(dx == 0)
   removeL <- length(removeID)
   if (removeL > 0) {
     warning("remove ", removeL, " rows with no population", call. = FALSE)
     dx <- dx[-removeID]
-    data <- data[-removeID,]
+    data <- data[-removeID, ]
   }  
-
+  
   sx <- data / dx
-  sx <- apply(sx * sx, 1, sum)
+  sx <- rowSums(sx * sx)
+  
   sum(dx * sx) / sum(dx)
 }
 
 .decompL <- function(data) {
   
-  groupsize <- apply(data, 2, sum)
+  if (inherits(data, "sf")) {
+    data <- st_drop_geometry(data)
+  }
+  
+  groupsize <- colSums(data)
   numpoints <- nrow(data)
   
-  tmp <- rep(groupsize / numpoints, numpoints)
-  dataL <- matrix(tmp, nrow = numpoints, byrow = TRUE)
+  dataL <- matrix(groupsize / numpoints, nrow = numpoints, ncol = length(groupsize), byrow = TRUE)
   
   .decomp(dataL)
 }
 
 .decompC <- function(data) {
   
-  tmp <- sum(data) / (nrow(data) * ncol(data))
+  if (inherits(data, "sf")) {
+    data <- st_drop_geometry(data)
+  }
+  
+  tmp <- sum(data, na.rm = TRUE) / (nrow(data) * ncol(data))
   dataC <- matrix(tmp, nrow = nrow(data), ncol = ncol(data))
   
   .decomp(dataC)
