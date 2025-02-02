@@ -1,15 +1,15 @@
 useDynLib(seg, .registration = TRUE)
 
-import(methods, stats, sp)
+import(methods, stats, sp, sf)
 importFrom(splancs, kernel2d)
 importFrom("graphics", "axis", "lines", "points")
 importFrom("utils", "combn")
 
-export(seg, dissim, isp, whiteseg)
+export(dissim, isp)
 export(localenv, spatseg, spseg)
-export(deseg, conprof)
-export(SegLocal, SegSpatial, SegDecomp)
-exportClasses(SegLocal, SegSpatial, SegDecomp)
+export(conprof)
+export(SegLocal, SegSpatial)
+exportClasses(SegLocal, SegSpatial)
 exportMethods(show, coerce, spplot)
 
 S3method(print, SegLocal)
@@ -20,6 +20,3 @@ S3method(update, SegLocal)
 
 S3method(as.list, SegSpatial)
 S3method(print, SegSpatial)
-
-S3method(as.vector, SegDecomp)
-S3method(print, SegDecomp)

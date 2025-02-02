@@ -65,10 +65,10 @@ slot(v, "d") <- runif(1)
 as.list(v)
 
 # displays the values in the slot 'data'
-spplot(v, col.regions = heat.colors(20))
+# spplot(v, col.regions = heat.colors(20))
 
 # displays the values in the slot 'env'
-w <- as(v, "SegLocal")
-spplot(w, col.regions = heat.colors(20))
+# w <- as(v, "SegLocal")
+# spplot(w, col.regions = heat.colors(20))
 }
 \keyword{classes}

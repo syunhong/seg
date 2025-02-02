@@ -70,11 +70,11 @@ plot.SegLocal <- function(x, which.col = 1:ncol(x@env), main = NULL, ...) {
   
   if (is.null(main)) main <- paste("Data", which.col)
   
-  ggplot(df, aes(x = x, y = y)) +
-    geom_point(aes(size = df[, which.col]), color = "blue", alpha = 0.6) +
-    scale_size_continuous(range = c(1, 6)) +
-    theme_minimal() +
-    labs(title = main, size = "Value")
+  # ggplot(df, aes(x = x, y = y)) +
+  #   geom_point(aes(size = df[, which.col]), color = "blue", alpha = 0.6) +
+  #   scale_size_continuous(range = c(1, 6)) +
+  #   theme_minimal() +
+  #   labs(title = main, size = "Value")
 }
 
 points.SegLocal <- function(x, which.col = 1, ...) {

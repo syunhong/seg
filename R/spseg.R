@@ -33,8 +33,8 @@ spseg <- function(x, data, method = "all", smoothing = "none",
   
   else if (smoothing == "kernel") {
     if (missing(window)) {
-      x_range <- range(coords[, 1])
-      y_range <- range(coords[, 2])
+      x_range <- range(coords[,1])
+      y_range <- range(coords[,2])
       window <- matrix(c(x_range[1], y_range[1], 
                          x_range[1], y_range[2], 
                          x_range[2], y_range[2], 
@@ -43,7 +43,7 @@ spseg <- function(x, data, method = "all", smoothing = "none",
     }
     
     if (missing(sigma))
-      sigma <- min(bw.nrd(coords[, 1], na.rm = TRUE), bw.nrd(coords[, 2], na.rm = TRUE))
+      sigma <- min(bw.nrd(coords[,1]), bw.nrd(coords[,2]))
     
     tmp <- surface.kernel(coords, data, sigma, nrow, ncol, window, verbose)
     coords <- tmp$coords

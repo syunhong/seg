@@ -10,13 +10,18 @@ chksegdata <- function(x, data) {
   proj4string <- as.character(NA)
   
   # ----------------------------------------------------------------------------
+  #
   # STEP 1. CHECK 'x'
+  #
   # ----------------------------------------------------------------------------
-  if (inherits(x, "sf")) {   
+  # (1) If 'x' is an object of class "sf", then do the following:
+  # ----------------------------------------------------------------------------
+  if (inherits(x, "sf")) { 
     message(fn, ": 'x' is an object of class \"sf\"")
     
-    # Convert MULTIPOLYGON/invalid geometries before extracting centroids
-    coords <- try(st_coordinates(st_centroid(st_make_valid(st_geometry(x)))), silent = TRUE)
+    coords <- try(st_geometry(x) |> st_make_valid() |> 
+                    st_centroid() |> st_coordinates(), silent = TRUE)
+
     if (inherits(coords, "try-error"))
       stop("failed to extract coordinates from 'x'", call. = FALSE)
     
@@ -41,9 +46,9 @@ chksegdata <- function(x, data) {
     }
     
     message(fn, ": retrieving projection information from 'x'")
-    proj4string <- st_crs(x)$wkt  # Use WKT format
+    proj4string <- st_crs(x)$proj4string
+    
   }
-  
   # ----------------------------------------------------------------------------
   # If 'x' is a spatial point pattern object (ppp)
   # ----------------------------------------------------------------------------
@@ -85,12 +90,15 @@ chksegdata <- function(x, data) {
   }
   
   # ----------------------------------------------------------------------------
+  #
   # STEP 2. CHECK 'data'
+  #
   # ----------------------------------------------------------------------------
-  if (ncol(data) < 2 || !is.numeric(data))
+  if (ncol(data) < 2 || !is.numeric(data)) {
     stop("'data' must be a numeric matrix with at least two columns", call. = FALSE)
-  else if (nrow(data) != nrow(coords))
+  } else if (nrow(data) != nrow(coords)) {
     stop("'data' must have the same number of rows as 'x'", call. = FALSE)
+  }
   
   tt <- as.numeric(difftime(Sys.time(), begTime, units = "sec"))
   message(fn, ": done! [", tt, " seconds]")

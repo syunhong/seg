@@ -22,8 +22,14 @@
 SEXP spsegIDX(SEXP Rx, SEXP Ry, SEXP Rm, SEXP Ridx)
 {
   int i, j, k, size = length(Rx), nrow, ncol = INTEGER(Rm)[0], *idx, INDEX;
+  /*
   double *x, *y, *resultsP, *xRowSum, *yRowSum, *xColSum, *yColSum, 
          *xProp, *yProp, xSum, xTmp, yTmp, logM, E, I = -0.1, denominator;
+  */
+  double *x, *y, *resultsP, *xRowSum, *yRowSum, *xColSum, *yColSum, 
+  *xProp, *yProp, xSum, xTmp, yTmp, logM, E, I = -0.1;
+  double denominator = 1.0;
+    
   SEXP results;
   
   PROTECT(Rx = coerceVector(Rx, REALSXP));

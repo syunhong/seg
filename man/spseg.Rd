@@ -55,6 +55,7 @@ Reardon, S. F., Farrell, C. R., Matthews, S. A., O'Sullivan, D., Bischoff, K., a
 \code{\link{SegSpatial-class}}, \code{\link{localenv}}, \code{kernel2d}
 }
 \examples{
+\dontrun{
 # uses the idealised landscapes in 'segdata'
 data(segdata)
 grd <- GridTopology(cellcentre.offset=c(0.5,0.5),
@@ -78,7 +79,7 @@ spplot(xx2, main = "Equal")
 xx3 <- spseg(grd.sp, data = test.df, smoothing = "kernel", 
              nrow = 20, ncol = 20)
 print(xx3, digits = 3)
-spplot(xx3, main = "Kernel")
+spplot(xx3, main = "Kernel")}
 
 \dontrun{
 # same as the above but with a boundary polygon

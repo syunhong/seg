@@ -59,18 +59,18 @@ v <- SegLocal(coords = as.matrix(xy), data = pop, env = pop)
 summary(v)
 
 # updates the map projection information
-v <- update(v, proj4string = CRS("+proj=nzmg +datum=nzgd49"))
+v <- update(v, proj4string = st_crs("+proj=nzmg +datum=nzgd49"))
 summary(v)
 
 # displays the (randomly-generated) local population data
-par(mfrow = c(1, 3))
-plot(v, main = paste("Data", colnames(pop)), xlab = "x", ylab = "y")
-par(mfrow = c(1, 1))
+# par(mfrow = c(1, 3))
+# plot(v, main = paste("Data", colnames(pop)), xlab = "x", ylab = "y")
+# par(mfrow = c(1, 1))
 
 # coverts the object to class 'Spatial'
-plot(as(v, "SpatialPoints"))
-spplot(v, col.regions = heat.colors(20))
-v.sp <- as(v, "SpatialPixelsDataFrame")
-is(v.sp)
+# plot(as(v, "sf"))
+# spplot(v, col.regions = heat.colors(20))
+# v.sp <- as(v, "SpatialPixelsDataFrame")
+# is(v.sp)
 }
 \keyword{classes}
