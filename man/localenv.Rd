@@ -57,7 +57,7 @@ Seong-Yun Hong
 data(segdata)
 grd <- GridTopology(cellcentre.offset=c(0.5,0.5),
                     cellsize=c(1,1), cells.dim=c(10,10))
-grd.sp <- as.SpatialPolygons.GridTopology(grd)
+grd.sp <- as.SpatialPolygons.GridTopology(grd) |> sf::st_as_sf()
 
 # complete segregation:
 # negative exponential function of distance

@@ -58,7 +58,7 @@ dissim <- function(x, data, nb, adjust = FALSE, p2n.args, n2m.args,
       }
     }
   }
-  
+ 
   if (!missing(nb) && !is.null(nb) && is.list(nb))  # Added nb validation
     out$user <- out$d - .d.adjust(data, nb)
   

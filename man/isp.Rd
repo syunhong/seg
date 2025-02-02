@@ -39,7 +39,7 @@ White, M. J. (1983). The measurement of spatial segregation. \emph{The American 
 data(segdata)
 grd <- GridTopology(cellcentre.offset=c(0.5,0.5),
                     cellsize=c(1,1), cells.dim=c(10,10))
-grd.sp <- as.SpatialPolygons.GridTopology(grd)
+grd.sp <- as.SpatialPolygons.GridTopology(grd) |> sf::st_as_sf()
 
 d <- rep(NA, 8) # index of dissimilarity
 p <- rep(NA, 8) # index of spatial proximity

@@ -31,8 +31,13 @@
 .use_contiguity <- function(x, data, queen, verbose) {
   speffect <- NA
   if (requireNamespace("spdep", quietly = TRUE)) {
-    if (verbose) message("library 'spdep' appears to be available\nattempting to calculate Morrill's D(adj)")
-    grd.nb <- poly2nb(x, queen = queen) |> nb2mat(style = "B")
+    if (verbose) {
+      message("library 'spdep' appears to be available")
+      message("attempting to calculate Morrill's D(adj)")
+    }
+    
+    grd.nb <- spdep::poly2nb(x, queen = queen) |> spdep::nb2mat(style = "B")
+
     grd.nb <- grd.nb / sum(grd.nb)
     speffect <- .spatial_adj(data, grd.nb)
   } else if (verbose) {
@@ -55,7 +60,8 @@
     return(result)
   }
   
-  common_borders <- try(x |> vect() |> sharedPaths() |> st_as_sf(), silent = TRUE)
+  common_borders <- try(x |> terra::vect() |> terra::sharedPaths() |> st_as_sf(), 
+                        silent = TRUE)
   if (inherits(common_borders, "try-error"))
     stop("failed to find common boundaries in 'x'", call. = FALSE)
   
