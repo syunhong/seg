@@ -54,7 +54,7 @@ spseg <- function(x, data, method = "all", smoothing = "none",
   # STEP 3 Calculate the population composition of each local environment
   # ----------------------------------------------------------------------------
   env <- localenv(coords, data, ...)
-  env <- update(env, proj4string = CRS(proj4string))
+  env <- update(env, proj4string = st_crs(proj4string))
   
   # ----------------------------------------------------------------------------
   # STEP 4 Compute the segregation indices

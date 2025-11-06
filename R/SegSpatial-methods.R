@@ -10,7 +10,7 @@
 setAs("SegSpatial", "SpatialPoints", 
       function(from) {
         validObject(from)
-        SpatialPoints(coords = from@coords, proj4string = from@proj4string)
+        SpatialPoints(coords = from@coords, proj4string = CRS(from@proj4string$input))
       })
 
 setAs("SegSpatial", "SpatialPointsDataFrame", 
@@ -18,7 +18,7 @@ setAs("SegSpatial", "SpatialPointsDataFrame",
         validObject(from)
         SpatialPointsDataFrame(coords = from@coords, 
                                data = data.frame(from@data),
-                               proj4string = from@proj4string)
+                               proj4string = CRS(from@proj4string$input))
       })
 
 setAs("SegSpatial", "SpatialPixelsDataFrame", 
@@ -26,7 +26,7 @@ setAs("SegSpatial", "SpatialPixelsDataFrame",
         validObject(from)
         SpatialPixelsDataFrame(points = from@coords, 
                                data = data.frame(from@data),
-                               proj4string = from@proj4string)
+                               proj4string = CRS(from@proj4string$input))
       })
 
 #setAs("SegSpatial", "SegLocal", 

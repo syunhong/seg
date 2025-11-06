@@ -16,7 +16,7 @@ setValidity(Class = "SegSpatial",
             })
 
 SegSpatial <- function(d, r, h, p, coords, data, env, 
-                       proj4string = CRS(as.character(NA))) {
+                       proj4string = st_crs(as.character(NA))) {
   new("SegSpatial", d = d, r = r, h = h, p = p, coords = coords, data = data, 
       env = env, proj4string = proj4string)
 }

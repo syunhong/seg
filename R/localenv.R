@@ -39,5 +39,5 @@ localenv <- function(x, data, power = 2, useExp = TRUE, scale = FALSE,
   
   env <- localenv.get(sprel, data, power, useExp, scale, maxdist, tol)
   
-  SegLocal(coords, data, env, CRS(proj4string))
+  SegLocal(coords, data, env, st_crs(proj4string))
 }
