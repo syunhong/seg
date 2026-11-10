@@ -1,35 +1,60 @@
 \name{SegLocal}
 \alias{SegLocal}
-\title{Create an Object of Class SegLocal}
+\alias{SegLocal-class}
+\alias{print.SegLocal}
+\alias{summary.SegLocal}
+\alias{update.SegLocal}
+\alias{plot.SegLocal}
+\alias{points.SegLocal}
+\alias{st_as_sf.SegLocal}
+\title{Local Environments}
 \description{
-Create a new object of \code{\link{SegLocal-class}} from a matrix of coordinates and population data.
+The class of objects returned by \code{\link{localenv}}, and its methods.
 }
 \usage{
-SegLocal(coords, data, env, proj4string = CRS(as.character(NA)))
+SegLocal(coords, data, env, crs = NA)
+
+\method{print}{SegLocal}(x, \dots)
+\method{summary}{SegLocal}(object, \dots)
+\method{update}{SegLocal}(object, coords, data, env, crs, \dots)
+\method{plot}{SegLocal}(x, which.col, main, \dots)
+\method{points}{SegLocal}(x, which.col = 1, \dots)
+\method{st_as_sf}{SegLocal}(x, \dots)
 }
 \arguments{
-  \item{coords}{a numeric matrix or data frame with coordinates (each row is a point).}
-  \item{data}{an object of class \code{matrix} containing the population data at each data point. The number of rows in \sQuote{data} should equal the number of points in \sQuote{coords}, and the number of columns should be greater than one (i.e., at least two population groups are required).}
-  \item{env}{an object of class \code{matrix} containing the local environment parameters. Must be the same dimensions as \sQuote{data}.}
-  \item{proj4string}{an optional projection string of class \code{CRS}.}
+  \item{coords}{a numeric matrix with two columns, x and y.}
+  \item{data}{a numeric matrix with at least two columns, giving the population of each group at each point.}
+  \item{env}{a numeric matrix with the same dimensions as \sQuote{data}, giving the population composition of the local environment of each point. If missing, \sQuote{data} is used.}
+  \item{crs}{a coordinate reference system, as accepted by \code{sf::st_crs}.}
+  \item{x, object}{an object of class \code{SegLocal}.}
+  \item{which.col}{the column(s) of \code{env} to plot.}
+  \item{main}{plot title(s).}
+  \item{\dots}{further arguments passed to \code{plot} and \code{points} (for \code{plot} and \code{points}) or to \code{summary} (for \code{summary}). Ignored otherwise.}
+}
+\details{
+A \code{SegLocal} object is a list with the components \code{coords}, \code{data}, \code{env} and \code{crs}. \code{plot} and \code{points} draw the points with symbol sizes proportional to the quintile of the local environment values. \code{st_as_sf} converts the object to \code{sf} points with the columns of \code{env} as attributes.
 }
 \value{
-An object of \code{\link{SegLocal-class}}.
+\code{SegLocal} and \code{update} return an object of class \code{SegLocal}. \code{st_as_sf} returns an \code{sf} object.
+}
+\note{
+Up to version 0.5-7, \code{SegLocal} was an S4 class whose slots were accessed with \code{@}, and the projection was stored as an \pkg{sp} \code{CRS} object in the slot \code{proj4string}. Use \code{$} instead (e.g., \code{x$env}); the projection is now an \pkg{sf} \code{crs} object in \code{x$crs}.
 }
 \author{
 Seong-Yun Hong
 }
 \seealso{
-\code{\link{SegLocal-class}}, \code{\link{localenv}}
+\code{\link{localenv}}, \code{\link{spatseg}}
 }
 \examples{
-# creates a random data set with 50 data points and 3 population groups
-xy <- matrix(runif(100), ncol = 2)
-colnames(xy) <- c("x", "y")
-pop <- matrix(runif(150), ncol = 3)
-colnames(pop) <- LETTERS[1:3]
+data(segdata)
+xy <- expand.grid(x = 1:10 - 0.5, y = 10:1 - 0.5)
+env <- localenv(xy, segdata[, 1:2])
+env
+summary(env)
+plot(env, which.col = 1)
 
-# constructs an object of class 'SegLocal'
-v <- SegLocal(coords = xy, data = pop, env = pop)
-is(v)
+# a SegLocal object built by hand, then the segregation measures
+v <- SegLocal(xy, segdata[, 1:2], env$env)
+spatseg(v)
 }

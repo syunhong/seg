@@ -1,64 +1,77 @@
 \name{dissim}
 \alias{dissim}
+\alias{seg}
 \title{Index of Dissimilarity}
 \description{
-Calculates the index of dissimilarity proposed by Duncan and Duncan (1955). If \sQuote{x} or \sQuote{nb} is given, the index is adjusted to reflect the spatial distribution of population.
+Calculates the index of dissimilarity proposed by Duncan and Duncan (1955). If polygons are given in \sQuote{x}, the index can be adjusted for the spatial arrangement of the population as suggested by Morrill (1991) and Wong (1993). The index can also be adjusted with a user-specified weighting matrix \sQuote{nb}.
 }
 \usage{
-dissim(x, data, nb, adjust = FALSE, use_queen = FALSE, verbose = FALSE)
+dissim(x, data, nb, adjust = FALSE, verbose = FALSE)
+seg(data, nb)
 }
 \arguments{
-  \item{x}{an optional object of class \code{SpatialPolygons} or \code{SpatialPolygonsDataFrame.}}
-  \item{data}{a numeric matrix or data frame with two columns that represent mutually exclusive population groups (e.g., Asians and non-Asians). If more than two columns are given, only the first two will be used for computing the index.}
-  \item{adjust}{logical. If TRUE, and if \sQuote{x} is given, the index of dissimilarity is adjusted according to the suggestions of Morrill (1991) and Wong (1993), depending on packages installed on the system. See \sQuote{Details} for more information. Ignore if \sQuote{x} is not given.}
-  \item{use_queen}{logical. If TRUE, the queen contiguity will be used.}
-  \item{verbose}{logical. If TRUE, print the current stage of the computation and time spent on each job to the screen.}
+  \item{x}{an optional \code{sf} or \code{sfc} object with polygon geometries.}
+  \item{data}{a numeric matrix or data frame with two columns that represent mutually exclusive population groups (e.g., Asians and non-Asians). If more than two columns are given, only the first two are used. This can be missing if \sQuote{x} is an \code{sf} object with the data attached.}
+  \item{nb}{an optional square \code{matrix} describing the intensity of interaction between geographic units. The sum of all elements should be one.}
+  \item{adjust}{logical. If TRUE and \sQuote{x} is given, the index is adjusted according to Morrill (1991) and Wong (1993). See \sQuote{Details}.}
+  \item{verbose}{logical. If TRUE, report the progress of the computation.}
 }
-
 \details{
-\code{dissim} calculates the index of dissimilarity for \sQuote{data}. If \sQuote{data} is missing, it attempts to extract the data from \sQuote{x}. If \sQuote{x} is not given, or if it is not a valid \code{SpatialPolygonsDataFrame} object, the function stops with an error.
+When \sQuote{x} is given and \sQuote{adjust} is TRUE, the boundaries shared by neighbouring polygons are found with \pkg{sf}, and three adjusted indices are computed. Each adjusted index takes the form
+\deqn{D - \sum_i \sum_j w_{ij} |z_i - z_j|,}{D - sum_i sum_j w_ij |z_i - z_j|,}
+where \eqn{z_i} is the proportion of group 1 in unit \eqn{i} and the sums run over all ordered pairs of units.
+\describe{
+  \item{Morrill's D(adj)}{\eqn{w_{ij}}{w_ij} is one for pairs of units that share a boundary (rook contiguity) and zero otherwise, divided by the sum over all pairs.}
+  \item{Wong's D(w)}{\eqn{w_{ij}}{w_ij} is the length of the boundary shared by units \eqn{i} and \eqn{j}, divided by the sum over all pairs.}
+  \item{Wong's D(s)}{the weights of D(w) are multiplied by \eqn{((P_i/A_i) + (P_j/A_j)) / 2} divided by the maximum of \eqn{P/A}, where \eqn{A} is the area of a unit and \eqn{P} its perimeter.}
+}
+Note that the perimeter \eqn{P} used for D(s) is the length of the boundary that a unit shares with other units in the study area, not its total perimeter: boundary segments on the edge of the study area are excluded. This follows Wong (1993) and is needed to reproduce the values reported there. Earlier versions of \pkg{seg} computed the same quantity with GRASS.
 
-When \sQuote{x} is given and \sQuote{adjust} is set to TRUE, the index is adjusted according to the suggestions of Morrill (1991) and Wong (1993). However, this automatic adjustment requires a number of packages to be installed on the user's system: \pkg{spdep} for Morrill's D(adj) and \pkg{spgrass6} and \pkg{rgdal} for Morrill's D(w) and D(s). Note that, for D(w) and D(s), GRASS commands should be accessible from within R.
+Areas and lengths are computed by \pkg{sf}, so they are in metres for geographic coordinates. Units with no population are removed from the adjustment, with a warning.
 
-Alternatively, the index value can be adjusted using a user-specified weighting matrix \sQuote{nb}. \sQuote{nb} must be a square matrix (i.e., one that has the same number of rows and columns) but does not have to be symmetric. If \sQuote{nb} is not specified, the function calculates the traditional index of dissimilarity proposed by Duncan and Duncan (1955). 
+If \sQuote{nb} is given, the index is adjusted with \sQuote{nb} as the weights \eqn{w_{ij}}{w_ij}. \sQuote{nb} does not have to be symmetric.
 
-If \sQuote{nb} is a rook-based contiguity matrix standardised by the total number of neighbours, the index is adjusted as described in Morrill (1991). See the example code below and \code{nb2mat} in \pkg{spdep} for more information regarding how to construct such a matrix. For Wong's D(w) and D(s), see \url{https://sites.google.com/site/hongseongyun/seg}. Note that the sum of all elements in \sQuote{nb} should equal one.
+\code{seg} is deprecated; use \code{dissim} instead.
 }
 \value{
-\code{dissim} returns a list containing the following elements:
+\code{dissim} returns a list with the following elements:
 \item{d}{index of dissimilarity.}
 \item{dm}{index of dissimilarity adjusted according to Morrill (1991). NA if not calculated.}
-\item{dw}{index of dissimilarity adjusted according to Wong (1993). NA if not calculated.}
-\item{ds}{index of dissimilarity adjusted according to Wong (1993). NA if not calculated.}
+\item{dw}{index of dissimilarity adjusted according to Wong (1993) using shared boundary lengths. NA if not calculated.}
+\item{ds}{index of dissimilarity adjusted according to Wong (1993) using shared boundary lengths and perimeter/area ratios. NA if not calculated.}
+\item{user}{index of dissimilarity adjusted with the user-specified matrix \sQuote{nb}. NA if \sQuote{nb} is missing.}
+}
+\note{
+Before version 0.6-0, \code{adjust = TRUE} relied on \pkg{spdep}, \pkg{spgrass6}, \pkg{rgdal} and a GRASS installation, and the arguments \code{p2n.args}, \code{n2m.args}, \code{wVECT.args} and \code{v2n.args} were passed to those packages. These arguments have been removed.
 }
 \author{
 Seong-Yun Hong
 }
 \references{
-Duncan, O. D., & Duncan, B. (1955). A methodological analysis of segregation indexes. \emph{American Sociological Review}, \bold{20}, 210-217.
+Duncan, O. D. and Duncan, B. (1955) A methodological analysis of segregation indexes. \emph{American Sociological Review}, \bold{20}, 210-217.
 
-Morrill, R. L. (1991). On the measure of geographic segregation. \emph{Geography Research Forum}, \bold{11}, 25-36.
+Morrill, R. L. (1991) On the measure of geographic segregation. \emph{Geography Research Forum}, \bold{11}, 25-36.
 
-Wong, D. W. S. (1993). Spatial indices of segregation. \emph{Urban Studies}, \bold{30}, 559-572.
+Wong, D. W. S. (1993) Spatial indices of segregation. \emph{Urban Studies}, \bold{30}, 559-572.
 }
 \seealso{
-\code{\link{spseg}}}
-\examples{
-if (require(spdep)) { # package 'spdep' is required
-
-  # uses the idealised landscapes in 'segdata'
-  data(segdata)
-  geom <- st_polygon(list(rbind(c(0,0), c(10,0), c(10,10), c(0,0)))) |> 
-    st_make_grid(cellsize = 1)
-  grd_sf <- st_sf(geom)
-  grd.nb <- nb2mat(poly2nb(grd_sf, queen = FALSE), style = "B")
-  grd.nb <- grd.nb / sum(grd.nb)
-
-  d <- list(); m <- list()
-  for (i in 1:8) {
-    idx <- 2 * i
-    d[[i]] <- dissim(data = segdata[,(idx-1):idx])
-    m[[i]] <- dissim(grd_sf, segdata[,(idx-1):idx], adjust = TRUE)
-  }
+\code{\link{spseg}}, \code{\link{isp}}
 }
+\examples{
+library(sf)
+data(segdata)
+grd <- st_make_grid(st_bbox(c(xmin = 0, ymin = 0, xmax = 10, ymax = 10)),
+                    n = 10)
+grd <- grd[as.vector(matrix(1:100, 10)[, 10:1])]
+
+# D, D(adj), D(w) and D(s) for the eight patterns
+out <- sapply(1:8, function(i) {
+  unlist(dissim(grd, segdata[, (2 * i - 1):(2 * i)], adjust = TRUE)[1:4])
+})
+colnames(out) <- LETTERS[1:8]
+round(out, 3)
+
+# a user-specified weighting matrix (here, rook contiguity)
+rook <- st_relate(grd, pattern = "F***1****", sparse = FALSE) * 1
+dissim(data = segdata[, 1:2], nb = rook / sum(rook))$user
 }

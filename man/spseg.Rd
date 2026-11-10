@@ -3,45 +3,49 @@
 \alias{spatseg}
 \title{Spatial Segregation Measures}
 \description{
-Calculates the set of spatial segregation measures developed by Reardon and O'Sullivan (2004).
+Calculates the set of spatial segregation measures developed by Reardon and O'Sullivan (2004), together with the local values that show where segregation is strong or weak.
 }
 \usage{
-spseg(x, data, method = "all", smoothing = "none", nrow = 100, ncol = 100, 
-      window, sigma, useC = TRUE, negative.rm = FALSE, 
+spseg(x, data, method = "all", smoothing = "none", nrow = 100, ncol = 100,
+      window, sigma, useC = TRUE, negative.rm = FALSE,
       tol = .Machine$double.eps, verbose = FALSE, \dots)
-spatseg(env, method = "all", useC = TRUE, negative.rm = FALSE, 
+spatseg(env, method = "all", useC = TRUE, negative.rm = FALSE,
         tol = .Machine$double.eps)
 }
 \arguments{
-  \item{x}{a numeric matrix or data frame with coordinates (each row is a point), or an object of class \code{Spatial} or \code{ppp}.}
-  \item{env}{an object of \code{\link{SegLocal-class}}.}
-  \item{data}{an object of class \code{matrix}, or one that can be coerced to that class. The number of rows in \sQuote{data} should equal the number of points in \sQuote{x}, and the number of columns should be greater than one (i.e., at least two population groups are required). This can be missing if \sQuote{x} has a data frame attached to it.}
-  \item{method}{a vector of character strings indicating an measure or measures to be computed. This must be one or more of the strings \dQuote{all} (default), \dQuote{exposure}, \dQuote{information}, \dQuote{diversity}, and \dQuote{dissimilarity}. Abbreviations are accepted, as long as it is clear which method is meant.}
-  \item{smoothing}{a character string indicating how to perform spatial smoothing of the population data. This must be (an abbreviation of) one of the strings \dQuote{none} (default), \dQuote{kernel}, or \dQuote{equal}.}
-  \item{nrow}{a numeric value indicating the number of row cells in the rasterised data surface. Ignored if \sQuote{smoothing} is \dQuote{none}.}
-  \item{ncol}{a numeric value indicating the number of column cells.}
-  \item{window}{an optional object of class \code{matrix} to be passed to \code{kernel2d}. See \sQuote{Details} in \code{\link{deseg}}.}
-  \item{sigma}{an optional numeric value specifying the kernel bandwidth to be passed to \code{kernel2d}. See also \sQuote{Details} in \code{\link{deseg}}.}
-  \item{useC}{logical. If TRUE, calculate the segregation values in C.}
-  \item{negative.rm}{logical. If TRUE, all geographic units where at least one group (i.e., column) has a population of zero or less will be removed to prevent -Inf or NaN in the information theory index. If FALSE, the non-positive values will be replaced with \sQuote{tol}.}
-  \item{tol}{a small, positive non-zero value. See \sQuote{Details}.}
-  \item{verbose}{logical. If TRUE, print the current stage of the computation and time spent on each job to the screen.}
-  \item{\dots}{optional arguments to be passed to \code{\link{localenv}} to compute the population composition of each local environment.}
+  \item{x}{a numeric matrix or data frame with coordinates (each row is a point), an \code{sf} or \code{sfc} object with point or polygon geometries, or an object of class \code{ppp}. For polygons, the centroids (of the largest part) are used as data points.}
+  \item{env}{an object of class \code{\link{SegLocal}}.}
+  \item{data}{a numeric matrix or data frame with at least two columns, one for each population group. The number of rows must equal the number of points or polygons in \sQuote{x}. This can be missing if \sQuote{x} is an \code{sf} or \code{ppp} object with the data attached.}
+  \item{method}{a vector of character strings indicating the measures to be computed: one or more of \dQuote{all} (default), \dQuote{exposure}, \dQuote{information}, \dQuote{diversity} and \dQuote{dissimilarity}. Abbreviations are accepted.}
+  \item{smoothing}{a character string indicating how to construct the population surface: \dQuote{none} (default), \dQuote{kernel} or \dQuote{equal}. See \sQuote{Details}.}
+  \item{nrow}{the number of rows of the grid used for the population surface. Ignored if \sQuote{smoothing} is \dQuote{none}.}
+  \item{ncol}{the number of columns of the grid.}
+  \item{window}{an optional polygon, given as a two-column matrix of vertices or as an \code{sf}/\code{sfc} polygon, within which the kernel surface is estimated. See \code{\link{deseg}}.}
+  \item{sigma}{an optional kernel bandwidth. See \code{\link{deseg}}.}
+  \item{useC}{logical. If TRUE, the global indices are calculated in C.}
+  \item{negative.rm}{logical. If TRUE, data points where at least one group has a population of zero or less are removed, to prevent \code{-Inf} or \code{NaN} in the information theory index. If FALSE, such values are replaced with \sQuote{tol}.}
+  \item{tol}{a small positive value. See \sQuote{Details}.}
+  \item{verbose}{logical. If TRUE, report the progress of the computation.}
+  \item{\dots}{optional arguments passed to \code{\link{localenv}}, such as \sQuote{power}, \sQuote{useExp} and \sQuote{maxdist}.}
 }
 \details{
-\code{spatseg} computes the set of spatial segregation measures proposed by Reardon and O'Sullivan.
+\code{spatseg} computes the measures from the local environments in a \code{\link{SegLocal}} object. \code{spseg} is a wrapper that first constructs the population surface and its local environments.
 
-\code{spseg} is a wrapper function, which calls \code{spatseg} after constructing a population density surface and its local environment parameters with user-specified options. Currently the population density surface is constructed by assuming that the population density is uniform in each census tract, or by using \code{kernel2d} in the package \pkg{splancs}. In the previous version (< 0.4.1), the function \code{rasterize} in \pkg{raster} was used in the case of the former, and \code{density.ppp} in \pkg{spatstat} for the latter.
+With \code{smoothing = "none"}, the data points are the input points or polygon centroids. With \code{"equal"}, the population of each polygon is spread evenly over the points of an \sQuote{nrow} by \sQuote{ncol} grid that fall inside it; polygons that contain no grid point are dropped with a warning, so \sQuote{nrow} and \sQuote{ncol} should be large enough for the smallest polygon. With \code{"kernel"}, a quartic kernel surface is estimated with \code{splancs::kernel2d} (see \code{\link{deseg}}).
 
-In R, \code{log(0)} is defined as \code{-Inf}, and \code{0 * log(0)} is \code{NaN} (not-a-number), in compliance with the IEEE Standard for Floating-Point Arithmetic. When computing the spatial information theory index, which is a spatial version of the entropy index, this is annoying because \code{0 * log(0)} occurs quite often, especially when one or more groups are small, and/or when the grid size is very small. To work around this problem, the argument \sQuote{tol} is added, so instead of \code{v * log(v)}, it calculates \code{(v + tol) * log(v + tol)}, where \code{v = 0}. This makes the entropy practically zero, as \sQuote{tol} goes towards 0.
+\code{tol} is added to all population values, so that \code{v * log(v)} is computed as \code{(v + tol) * log(v + tol)} and does not become \code{NaN} when \code{v = 0}.
+
+Each of the dissimilarity (D), relative diversity (R) and information theory (H) indices is a population-weighted average of local values,
+\deqn{D = \sum_p \frac{t_p}{T} d_p, \quad d_p = \frac{\sum_m |\tilde\pi_{pm} - \pi_m|}{2I},}{D = sum_p (t_p/T) d_p,  d_p = sum_m |pi~_pm - pi_m| / (2 I),}
+\deqn{R = \sum_p \frac{t_p}{T} r_p, \quad r_p = 1 - \frac{\tilde I_p}{I},}{R = sum_p (t_p/T) r_p,  r_p = 1 - I~_p / I,}
+\deqn{H = \sum_p \frac{t_p}{T} h_p, \quad h_p = 1 - \frac{\tilde E_p}{E},}{H = sum_p (t_p/T) h_p,  h_p = 1 - E~_p / E,}
+where \eqn{t_p} is the population at point \eqn{p}, \eqn{T} the total population, \eqn{\pi_m}{pi_m} the overall proportion of group \eqn{m}, \eqn{\tilde\pi_{pm}}{pi~_pm} its proportion in the local environment of \eqn{p}, and \eqn{I}, \eqn{\tilde I_p}{I~_p}, \eqn{E} and \eqn{\tilde E_p}{E~_p} the interaction (Simpson) and entropy indices of the region and of the local environment of \eqn{p}. The local values are returned in the component \code{local} and mapped by \code{\link{plot.SegSpatial}}. Larger values indicate places that contribute more to segregation. \eqn{r_p} and \eqn{h_p} are negative where the local environment is more diverse than the region as a whole.
 }
 \value{
-An object of \code{\link{SegSpatial-class}}.
+An object of class \code{\link{SegSpatial}}.
 }
 \note{
-The exposure/isolation index, P, is presented in a matrix form. The spatial exposure of group \sQuote{m} to group \sQuote{n} is located in the row \sQuote{m} and column \sQuote{n} of the matrix. The matrix is rarely symmetric in practice so the spatial exposure index should be interpreted with care.
-
-The spatial isolation index values are given in the diagonal cells of the matrix; cell value at (m, m) indicates the degree of spatial isolation for group \sQuote{m} for example.
+The exposure/isolation index, P, is a matrix. The spatial exposure of group \sQuote{m} to group \sQuote{n} is in row \sQuote{m} and column \sQuote{n}. The matrix is rarely symmetric, so it should be interpreted with care. The diagonal cells are the spatial isolation indices.
 }
 \author{
 Seong-Yun Hong
@@ -49,54 +53,36 @@ Seong-Yun Hong
 \references{
 Reardon, S. F. and O'Sullivan, D. (2004) Measures of spatial segregation. \emph{Sociological Methodology}, \bold{34}, 121-162.
 
-Reardon, S. F., Farrell, C. R., Matthews, S. A., O'Sullivan, D., Bischoff, K., and Firebaugh, G. (2009) Race and space in the 1990s: Changes in the geographic scale of racial residential segregation, 1990-2000. \emph{Social Science Research}, \bold{38}, 55-70.
+Reardon, S. F., Farrell, C. R., Matthews, S. A., O'Sullivan, D., Bischoff, K. and Firebaugh, G. (2009) Race and space in the 1990s: Changes in the geographic scale of racial residential segregation, 1990-2000. \emph{Social Science Research}, \bold{38}, 55-70.
 }
 \seealso{
-\code{\link{SegSpatial-class}}, \code{\link{localenv}}, \code{kernel2d}
+\code{\link{SegSpatial}}, \code{\link{plot.SegSpatial}}, \code{\link{localenv}}, \code{\link{deseg}}
 }
 \examples{
-\dontrun{
-# uses the idealised landscapes in 'segdata'
+library(sf)
 data(segdata)
-grd <- GridTopology(cellcentre.offset=c(0.5,0.5),
-                    cellsize=c(1,1), cells.dim=c(10,10))
-grd.sp <- as.SpatialPolygons.GridTopology(grd)
-test.df <- segdata[,1:2]
+grd <- st_make_grid(st_bbox(c(xmin = 0, ymin = 0, xmax = 10, ymax = 10)),
+                    n = 10)
+grd <- grd[as.vector(matrix(1:100, 10)[, 10:1])]
+x <- st_sf(segdata[, 1:2], geometry = grd)
 
 # no spatial smoothing
-xx1 <- spseg(grd.sp, data = test.df)
-print(xx1, digits = 3)
+a <- spseg(x)
+print(a, digits = 3)
+plot(a)
+plot(a, index = "information", main = "Local H",
+     xlab = "Easting", ylab = "Northing", axes = TRUE)
 
-# plots the values in the slot 'data'
-spplot(xx1, main = "No spatial smoothing")
+# population spread evenly within each polygon
+b <- spseg(x, smoothing = "equal", nrow = 50, ncol = 50)
+print(b, digits = 3)
 
-# smoothes the data points
-xx2 <- spseg(grd.sp, data = test.df, smoothing = "equal")
-print(xx2, digits = 3)
-spplot(xx2, main = "Equal")
+# kernel smoothing within a boundary polygon
+w <- matrix(c(1.5, 1.5, 1.5, 8.5, 8.5, 8.5, 8.5, 4.5, 5.5, 4.5, 5.5, 1.5),
+            ncol = 2, byrow = TRUE)
+k <- spseg(x, smoothing = "kernel", window = w, nrow = 20, ncol = 20)
+print(k, digits = 3)
 
-# uses the kernel smoothing of the data points
-xx3 <- spseg(grd.sp, data = test.df, smoothing = "kernel", 
-             nrow = 20, ncol = 20)
-print(xx3, digits = 3)
-spplot(xx3, main = "Kernel")}
-
-\dontrun{
-# same as the above but with a boundary polygon
-w <- matrix(c(1.5, 1.5,
-              1.5, 8.5,
-              8.5, 8.5,
-              8.5, 4.5,
-              5.5, 4.5,
-              5.5, 1.5), ncol = 2, byrow = TRUE)
-xx4 <- spseg(grd.sp, data = segdata[,1:2], smoothing = "kernel", 
-             window = w, nrow = 20, ncol = 20)
-print(xx4, digits = 3)
-spplot(xx4, main = "Kernel with a boundary polygon")
-
-# retrieves the index values
-as.list(xx4)
-
-# shows the values in the slot 'env'
-spplot(as(xx4, "SegLocal"), main = "Local population composition")}
+# the index values as a list
+as.list(k)
 }

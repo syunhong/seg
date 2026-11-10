@@ -1,108 +1,103 @@
 # ------------------------------------------------------------------------------
 # Internal function 'chksegdata'
 #
-# Author: Seong-Yun Hong <syhong@khu.ac.kr>
-# Last update: 2025-02-02
+# Standardises the input of the user-level functions. Returns the point
+# coordinates, the population data, the CRS, and (if 'x' was an sf object) the
+# geometry, all with incomplete rows removed.
 # ------------------------------------------------------------------------------
 chksegdata <- function(x, data) {
-  
-  begTime <- Sys.time(); fn <- match.call()[[1]]
-  proj4string <- as.character(NA)
-  
-  # ----------------------------------------------------------------------------
-  #
-  # STEP 1. CHECK 'x'
-  #
-  # ----------------------------------------------------------------------------
-  # (1) If 'x' is an object of class "sf", then do the following:
-  # ----------------------------------------------------------------------------
-  if (inherits(x, "sf")) { 
-    message(fn, ": 'x' is an object of class \"sf\"")
-    
-    coords <- try(st_geometry(x) |> st_make_valid() |> 
-                    st_centroid() |> st_coordinates(), silent = TRUE)
 
-    if (inherits(coords, "try-error"))
-      stop("failed to extract coordinates from 'x'", call. = FALSE)
-    
-    message(fn, ": ", nrow(coords), " coordinates extracted from 'x'")
-    
+  geom <- NULL
+  crs <- sf::NA_crs_
+
+  # 'sp' objects are still accepted if the user has them, via sf
+  if (inherits(x, "Spatial"))
+    x <- sf::st_as_sf(x)
+
+  if (inherits(x, c("sf", "sfc"))) {
+    geom <- sf::st_geometry(x)
+    crs <- sf::st_crs(geom)
     if (missing(data)) {
-      data <- try(st_drop_geometry(x), silent = TRUE) 
-      if (inherits(data, "try-error"))
+      if (!inherits(x, "sf"))
         stop("'data' is missing, with no default", call. = FALSE)
-      message(fn, ": 'data' is missing, using attached data in 'x'")
+      data <- sf::st_drop_geometry(x)
     }
-    
-    data <- try(as.matrix(data), silent = TRUE)
-    if (inherits(data, "try-error"))
-      stop("failed to coerce 'data' to matrix", call. = FALSE)
-    
-    # Handle NA values in 'data'
-    removeNA <- which(apply(data, 1, function(z) any(is.na(z))))
-    if (length(removeNA) > 0) {
-      warning(fn, ": ", length(removeNA), " row(s) contain NA values.")
-      data[removeNA,] <- 0  # Replace NA values with 0 instead of removing
-    }
-    
-    message(fn, ": retrieving projection information from 'x'")
-    proj4string <- st_crs(x)$proj4string
-    
+    coords <- .sfc2coords(geom)
   }
-  # ----------------------------------------------------------------------------
-  # If 'x' is a spatial point pattern object (ppp)
-  # ----------------------------------------------------------------------------
+
   else if (inherits(x, "ppp")) {
-    message(fn, ": 'x' is an object of class \"ppp\"")
-    coords <- cbind(x = x$x, y = x$y)
-    
+    coords <- cbind(x$x, x$y)
     if (missing(data)) {
-      if (is.null(x$marks)) {
+      if (is.null(x$marks))
         stop("'data' is missing, with no default", call. = FALSE)
-      } else {
-        data <- as.matrix(x$marks)
-        message(fn, ": 'data' is missing, using marks attached to 'x'")
-      }
-    } else {
-      data <- as.matrix(data)
+      data <- x$marks
     }
   }
-  
-  # ----------------------------------------------------------------------------
-  # If 'x' is a numeric matrix or data frame with coordinates
-  # ----------------------------------------------------------------------------
+
   else if (is.matrix(x) || is.data.frame(x)) {
-    message(fn, ": 'x' is an object of class \"matrix\" or \"data.frame\"")      
     coords <- as.matrix(x)
     if (ncol(coords) != 2 || !is.numeric(coords))
-      stop("'x' must be a numeric matrix with two columns (x, y)", call. = FALSE)
+      stop("'x' must be a numeric matrix with two columns", call. = FALSE)
     if (missing(data))
       stop("'data' is missing, with no default", call. = FALSE)
-    else
-      data <- as.matrix(data)
   }
-  
-  # ----------------------------------------------------------------------------
-  # If 'x' is not one of the supported classes
-  # ----------------------------------------------------------------------------
+
   else {
     stop("invalid object 'x'", call. = FALSE)
   }
-  
-  # ----------------------------------------------------------------------------
-  #
-  # STEP 2. CHECK 'data'
-  #
-  # ----------------------------------------------------------------------------
-  if (ncol(data) < 2 || !is.numeric(data)) {
-    stop("'data' must be a numeric matrix with at least two columns", call. = FALSE)
-  } else if (nrow(data) != nrow(coords)) {
+
+  data <- as.matrix(data)
+  if (ncol(data) < 2 || !is.numeric(data))
+    stop("'data' must be a numeric matrix with at least two columns",
+         call. = FALSE)
+  if (nrow(data) != nrow(coords))
     stop("'data' must have the same number of rows as 'x'", call. = FALSE)
+
+  keep <- which(stats::complete.cases(data))
+  if (length(keep) < nrow(data)) {
+    message(nrow(data) - length(keep), " row(s) with NA removed")
+    data <- data[keep, , drop = FALSE]
+    coords <- coords[keep, , drop = FALSE]
+    if (!is.null(geom))
+      geom <- geom[keep]
   }
-  
-  tt <- as.numeric(difftime(Sys.time(), begTime, units = "sec"))
-  message(fn, ": done! [", tt, " seconds]")
-  
+
+  storage.mode(coords) <- "double"
   colnames(coords) <- c("x", "y")
-  list(coords = coords, data = data, proj4string = proj4string)
+  rownames(coords) <- NULL
+
+  list(coords = coords, data = data, crs = crs, geom = geom,
+       polygons = .is.polygons(geom))
+}
+
+# Coordinates of points, or centroids of polygons (of the largest part, as
+# the label points used by 'sp' in earlier versions)
+.sfc2coords <- function(geom) {
+  type <- as.character(sf::st_geometry_type(geom, by_geometry = TRUE))
+  if (isTRUE(sf::st_is_longlat(geom)))
+    warning("'x' has geographic coordinates; distances are computed as ",
+            "if they were planar. Consider sf::st_transform().", call. = FALSE)
+  if (all(type == "POINT"))
+    xy <- sf::st_coordinates(geom)
+  else if (all(type %in% c("POLYGON", "MULTIPOLYGON")))
+    xy <- sf::st_coordinates(suppressWarnings(
+      sf::st_centroid(geom, of_largest_polygon = TRUE)))
+  else
+    stop("'x' must contain either points or polygons", call. = FALSE)
+  xy[, 1:2, drop = FALSE]
+}
+
+.is.polygons <- function(geom) {
+  if (is.null(geom))
+    return(FALSE)
+  type <- as.character(sf::st_geometry_type(geom, by_geometry = TRUE))
+  all(type %in% c("POLYGON", "MULTIPOLYGON"))
+}
+
+# Index of the polygon that contains each point (first match), or NA
+.which.polygon <- function(coords, geom) {
+  pts <- sf::st_as_sf(as.data.frame(coords), coords = 1:2,
+                      crs = sf::st_crs(geom))
+  hits <- sf::st_intersects(pts, geom)
+  vapply(hits, function(z) if (length(z)) z[1L] else NA_integer_, 1L)
 }

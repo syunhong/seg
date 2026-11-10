@@ -1,58 +1,47 @@
 \name{isp}
 \alias{isp}
-\title{Index of Spatial Proximity}
+\alias{whiteseg}
+\title{White's Spatial Proximity Index}
 \description{
-Computes the index of spatial proximity developed by White (1983). This measure estimates the level of clustering by comparing the average distance between members of the same group with that between all individuals (regardless of the groups to which they belong). The results may change drastically depending on the definition of distance.
+Calculates the index of spatial proximity proposed by White (1983).
 }
 \usage{
 isp(x, data, nb, fun, verbose = FALSE, \dots)
+whiteseg(x, data, nb, fun, verbose = FALSE, \dots)
 }
 \arguments{
-  \item{x}{a numeric matrix or data frame with coordinates (each row is a point), or an object of class \code{sf}.}
-  \item{data}{an object of class \code{matrix}, or one that can be coerced to that class. The number of rows in \sQuote{data} should equal the number of geographic units in \sQuote{x}, and the number of columns should be greater than one (i.e., at least two population groups are required). This can be missing if \sQuote{x} has a data frame attached to it.}
-  \item{nb}{an optional \code{matrix} object indicating the distances between the geographic units.}
-  \item{fun}{a function for the calculation of proximity. The function should take a numeric vector as an argument (distance) and return a vector of the same length (proximity). If this is not specified, a negative exponential function is used by default.}
-  \item{verbose}{logical. If TRUE, print the current stage of the computation and time spent on each job to the screen.}
-  \item{\dots}{optional arguments to be passed to \code{dist} when calculating the distances between the geographic units in \sQuote{x}. Ignored if \sQuote{nb} is given. See \code{help(dist)} for available options.}
+  \item{x}{a numeric matrix or data frame with coordinates (each row is a point), an \code{sf} or \code{sfc} object with point or polygon geometries, or an object of class \code{ppp}. For polygons, the centroids are used.}
+  \item{data}{a numeric matrix or data frame with at least two columns, one for each population group. The number of rows must equal the number of points in \sQuote{x}. This can be missing if \sQuote{x} is an \code{sf} or \code{ppp} object with the data attached.}
+  \item{nb}{an optional matrix of distances between the points. If missing, Euclidean distances between the coordinates are used.}
+  \item{fun}{an optional function of distance that gives the degree of spatial interaction. The default is \code{function(z) exp(-z)}.}
+  \item{verbose}{logical. Currently unused; kept for compatibility.}
+  \item{\dots}{optional arguments passed to \code{\link{dist}} when \sQuote{nb} is missing.}
 }
 \details{
-\sQuote{nb} must be a square matrix (i.e., one that has the same number of rows and columns) but does not have to be symmetric. If \sQuote{nb} is not given, \code{whiteseg} attempts to create a distance matrix of \sQuote{x} using the function \code{dist} in \pkg{stats} and use it as \sQuote{nb}. The optional arguments in \sQuote{\dots} will be passed to \code{dist}.
+Pairs of points with a distance of zero, including each point paired with itself, are excluded. \code{whiteseg} is deprecated; use \code{isp} instead.
 }
 \value{
-A single numeric value indicating the degree of segregation; a value of 1 indicates absence of segregation, and values greater than 1.0 indicate clustering. If the index value is less than one, it indicates an unusual form of segregation (i.e., people live closer to other population groups).
+A single numeric value. A value of one indicates no spatial clustering of the groups; values greater than one indicate that members of each group live closer to one another than to members of the other groups.
 }
 \author{
 Seong-Yun Hong
 }
 \references{
-White, M. J. (1983). The measurement of spatial segregation. \emph{The American Journal of Sociology}, \bold{88}, 1008-1018.
+White, M. J. (1983) The measurement of spatial segregation. \emph{American Journal of Sociology}, \bold{88}, 1008-1018.
 }
 \seealso{
-\code{\link{dissim}}, \code{dist}
+\code{\link{dissim}}, \code{\link{spseg}}
 }
 \examples{
-# uses the idealised landscapes in 'segdata'
+library(sf)
 data(segdata)
-geom <- st_polygon(list(rbind(c(0,0), c(10,0), c(10,10), c(0,0)))) |> 
-  st_make_grid(cellsize = 1)
-grd_sf <- st_sf(geom)
+grd <- st_make_grid(st_bbox(c(xmin = 0, ymin = 0, xmax = 10, ymax = 10)),
+                    n = 10)
+grd <- grd[as.vector(matrix(1:100, 10)[, 10:1])]
 
-d <- rep(NA, 8) # index of dissimilarity
-p <- rep(NA, 8) # index of spatial proximity
-cols <- rep("white", 100)
-for (i in 1:8) {
-  idx <- 2 * i
-  d[i] <- dissim(segdata[,(idx-1):idx])
-  p[i] <- isp(grd_sf, data = segdata[,(idx-1):idx])
-  full <- segdata[,(idx-1)] == 100
-  half <- segdata[,(idx-1)] == 50
-  cols <- rep("white", 100)
-  cols[full] <- "black"
-  if (any(half)) {
-    cols[half] <- "grey"
-  }
-  plot(grd_sf, col = cols)
-  text(5, 11.5, labels = 
-       paste("D = ", round(d[i], 2), ", P = ", round(p[i], 2), sep = ""))
-}
+isp(grd, segdata[, 1:2])
+isp(grd, segdata[, 5:6])
+
+# a different distance-decay function
+isp(grd, segdata[, 1:2], fun = function(z) 1 / (1 + z^2))
 }

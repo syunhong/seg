@@ -1,21 +1,31 @@
 Package: seg
-Version: 0.6-1
-Date: 2025-02-02
+Version: 0.6-0
+Date: 2026-11-08
 Title: Measuring Spatial Segregation
-Author: Seong-Yun Hong <syhong@khu.ac.kr> and David O'Sullivan, with code 
-  contributions by Benjamin Jarvis and Changlock Choi
-Maintainer: Seong-Yun Hong <syhong@khu.ac.kr>
-Depends: R (>= 4.2.0), methods, stats, sf, sp, splancs
-Suggests: terra
-Description: Measuring spatial segregation. The methods implemented in this 
-        package include White's P index (1983) <doi:10.1086/227768>, 
-        Morrill's D(adj) (1991), Wong's D(w) and D(s) (1993) 
-        <doi:10.1080/00420989320080551>, and Reardon and O'Sullivan's set of 
-        spatial segregation measures (2004) 
-        <doi:10.1111/j.0081-1750.2004.00150.x>.
+Authors@R: c(
+    person("Seong-Yun", "Hong", email = "syhong@khu.ac.kr",
+           role = c("aut", "cre")),
+    person("David", "O'Sullivan", role = "aut"),
+    person("Benjamin", "Jarvis", role = "ctb",
+           comment = "scaled kernels in localenv()"),
+    person("Changlock", "Choi", role = "ctb"))
+Depends: R (>= 4.1.0)
+Imports: sf (>= 1.0-24), splancs, graphics, grDevices, stats
+Description: Measuring spatial segregation. The methods implemented in this
+    package include White's P index (1983) <doi:10.1086/227768>,
+    Morrill's D(adj) (1991), Wong's D(w) and D(s) (1993)
+    <doi:10.1080/00420989320080551>, and Reardon and O'Sullivan's set of
+    spatial segregation measures (2004)
+    <doi:10.1111/j.0081-1750.2004.00150.x>, with maps of where segregation
+    is strong or weak. Spatial data are handled with 'sf'.
 License: GPL (>= 3)
 URL: https://github.com/syunhong/seg
+BugReports: https://github.com/syunhong/seg/issues
+Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2019-12-18 05:31:01 UTC; Seong-Yun
-Repository: CRAN
-Date/Publication: 2019-12-18 15:20:02 UTC
+Packaged: 2026-11-08 05:57:10 UTC; root
+Author: Seong-Yun Hong [aut, cre],
+  David O'Sullivan [aut],
+  Benjamin Jarvis [ctb] (scaled kernels in localenv()),
+  Changlock Choi [ctb]
+Maintainer: Seong-Yun Hong <syhong@khu.ac.kr>
